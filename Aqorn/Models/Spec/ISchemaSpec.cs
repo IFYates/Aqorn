@@ -1,10 +1,6 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿namespace Aqorn.Models.Spec;
 
-namespace Aqorn.Models.Spec;
-
-internal interface ISchemaSpec : ISpecModel
+internal interface ISchemaSpec : ISpecModel, IModelValidator
 {
     TableSpec[] Tables { get; }
-
-    bool TryGetTable(string name, [MaybeNullWhen(false)] out TableSpec tableSpec);
 }

@@ -9,13 +9,13 @@ internal partial class FieldTypeSpec : ModelBase, ISpecModel
     public Regex? Regex { get; set; }
     public int? Length { get; }
 
-    public FieldTypeSpec(IModel parent, FieldValue.ValueType type)
+    public FieldTypeSpec(ModelBase parent, FieldValue.ValueType type)
         : base(parent, null!)
     {
         Type = type;
         IsRequired = type != FieldValue.ValueType.Null;
     }
-    public FieldTypeSpec(IModel parent, string type)
+    public FieldTypeSpec(ModelBase parent, string type)
         : base(parent, null!)
     {
         if (string.IsNullOrEmpty(type))

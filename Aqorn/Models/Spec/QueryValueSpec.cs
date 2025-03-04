@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 
 namespace Aqorn.Models.Spec;
 
-internal class QueryValueSpec(IModel parent)
+internal class QueryValueSpec(ModelBase parent)
     : ValueBase(parent)
 {
     public string TableName { get; protected init; } = null!;

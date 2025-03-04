@@ -2,7 +2,7 @@
 
 namespace Aqorn.Models.Spec;
 
-internal class TableSpec(IModel parent, string name)
+internal class TableSpec(ModelBase parent, string name)
     : ModelBase(parent, name), ISpecModel
 {
     private readonly string _tableName = null!;

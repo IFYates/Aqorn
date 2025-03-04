@@ -2,8 +2,8 @@
 
 namespace Aqorn.Models.Data;
 
-internal class TableModel(IModel parent, string name)
-    : ModelBase(parent, name), IDataModel<TableSpec>
+internal class TableModel(ModelBase parent, string name)
+    : ModelBase(parent, name)
 {
     public TableRowModel[] Rows { get; protected init; } = [];
 

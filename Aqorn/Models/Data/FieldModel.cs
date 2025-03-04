@@ -2,8 +2,8 @@
 
 namespace Aqorn.Models.Data;
 
-internal class FieldModel(IModel parent, string name)
-    : ModelBase(parent, name), IDataModel<FieldSpec>
+internal class FieldModel(ModelBase parent, string name)
+    : ModelBase(parent, name)
 {
     public ValueBase Value { get; protected set; } = null!;
 
