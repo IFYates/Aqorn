@@ -1,6 +1,6 @@
 ﻿namespace Aqorn.Models.Data;
 
-internal interface IDataSchema
+internal interface IDataSchema : IModelValidator
 {
     TableModel[] Tables { get; }
 }

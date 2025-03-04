@@ -1,6 +1,5 @@
 ﻿using Aqorn.Models;
 using Aqorn.Models.Data;
-using Aqorn.Models.Spec;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
@@ -13,7 +12,7 @@ internal class JsonDataFile : ModelBase, IDataSchema
     public TableModel[] Tables { get; }
 
     public JsonDataFile(string file)
-        : base(null!, null!, new ModelValidator())
+        : base(null!, null!)
     {
         Tables = parse(file);
     }
@@ -44,19 +43,17 @@ internal class JsonDataFile : ModelBase, IDataSchema
             .Select(t => new JsonTableModel(this, t.Name, t.Value)).ToArray();
     }
 
-    public string[] Validate(ISchemaSpec spec)
+    #region IModelValidator
+
+    protected override IModelValidator Validator => this;
+
+    private readonly List<string> _errors = [];
+    public string[] Errors => _errors.ToArray();
+
+    public void AddError(IModel model, string text)
     {
-        foreach (var table in Tables)
-        {
-            if (!spec.TryGetTable(table.Name, out var tableSpec))
-            {
-                Error("Data table has no matching spec.");
-            }
-            else
-            {
-                table.Validate(tableSpec);
-            }
-        }
-        return Validator.Errors;
+        _errors.Add((model.Path.Length > 0 ? model.Path + ": " : null) + text);
     }
+
+    #endregion IModelValidator
 }

@@ -1,19 +1,12 @@
 ﻿using Aqorn.Models.Spec;
-using System.Diagnostics.CodeAnalysis;
 
 namespace Aqorn.Models.Data;
 
-internal class TableRowModel(IModel parent, string name)
-    : ModelBase(parent, name), IDataModel<TableSpec>
+internal class TableRowModel(ModelBase parent, string name)
+    : ModelBase(parent, name)
 {
     public FieldModel[] Fields { get; protected init; } = [];
     public TableModel[] Relationships { get; protected init; } = [];
-
-    public bool TryGetField(string name, [MaybeNullWhen(false)] out FieldModel field)
-    {
-        field = Fields.FirstOrDefault(f => f.Name == name);
-        return field != null;
-    }
 
     public TableSpec? Spec { get; private set; }
     public void Validate(TableSpec tableSpec)
