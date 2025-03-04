@@ -1,8 +1,10 @@
-﻿namespace Aqorn.Models.Spec;
+﻿using Aqorn.Models.Values;
 
-internal class FieldSpec(ModelBase parent, string name)
-    : ModelBase(parent, name), ISpecModel
+namespace Aqorn.Models.Spec;
+
+internal class FieldSpec(string name)
 {
+    public string Name { get; } = name;
     public FieldTypeSpec? ValueType { get; protected init; }
-    public ValueBase? Value { get; protected init; }
+    public IValue? Value { get; protected init; }
 }

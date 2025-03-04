@@ -1,36 +1,42 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Data;
+﻿using Aqorn.Models.Data;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
 
 internal class JsonTableModel : TableModel
 {
-    public JsonTableModel(IModel parent, string name, JsonElement json)
-        : base(parent, name)
+    public JsonTableModel(IErrorLog errors, string name, JsonElement json)
+        : base(name)
     {
-        if (json.ValueKind == JsonValueKind.Array)
+        Rows = parse(errors, json);
+    }
+
+    private TableRowModel[] parse(IErrorLog errors, JsonElement json)
+    {
+        switch (json.ValueKind)
         {
-            var rows = new List<TableRowModel>();
-            var idx = 0;
-            foreach (var row in json.EnumerateArray())
-            {
-                if (row.ValueKind != JsonValueKind.Object)
+            case JsonValueKind.Array:
                 {
-                    Error($"Table row data must be an object ('{Name}[{idx++}]' gave {row.ValueKind}).");
-                    continue;
+                    var rows = new List<TableRowModel>();
+                    var idx = 0;
+                    foreach (var row in json.EnumerateArray())
+                    {
+                        if (row.ValueKind != JsonValueKind.Object)
+                        {
+                            errors.Add($"Table row data must be an object ('{Name}[{idx++}]' gave {row.ValueKind}).");
+                            continue;
+                        }
+                        rows.Add(new JsonTableRowModel(errors.Step(idx++.ToString()), this, row));
+                    }
+                    return rows.ToArray();
                 }
-                rows.Add(new JsonTableRowModel(this, idx++.ToString(), row));
-            }
-            Rows = rows.ToArray();
-        }
-        else if (json.ValueKind == JsonValueKind.Object)
-        {
-            Rows = [new JsonTableRowModel(this, null!, json)];
-        }
-        else
-        {
-            Error($"Table must be an object ('{Name}' gave {json.ValueKind}).");
+
+            case JsonValueKind.Object:
+                return [new JsonTableRowModel(errors, this, json)];
+
+            default:
+                errors.Add($"Table must be an object ('{Name}' gave {json.ValueKind}).");
+                return [];
         }
     }
 }

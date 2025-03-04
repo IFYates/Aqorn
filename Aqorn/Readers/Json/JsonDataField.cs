@@ -1,5 +1,5 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Data;
+﻿using Aqorn.Models.Data;
+using Aqorn.Models.Values;
 using Aqorn.Readers.Json.Spec;
 using System.Text.Json;
 
@@ -7,8 +7,8 @@ namespace Aqorn.Readers.Json;
 
 internal class JsonDataField : FieldModel
 {
-    public JsonDataField(IModel parent, string name, JsonElement json)
-        : base(parent, name)
+    public JsonDataField(IErrorLog errors, string name, JsonElement json)
+        : base((IValue)null!, name) // TODO
     {
         switch (json.ValueKind)
         {
@@ -17,19 +17,19 @@ internal class JsonDataField : FieldModel
             case JsonValueKind.False:
             case JsonValueKind.Null:
             case JsonValueKind.Number:
-                Value = new JsonFieldValue(this, json);
+                Value = new JsonFieldValue(errors, json);
                 return;
             case JsonValueKind.Array:
-                Value = new JsonConcatenatedValue(this, json);
+                Value = new JsonConcatenatedValue(errors, name, json);
                 return;
             case JsonValueKind.Object:
                 if (json.TryGetProperty("?", out _))
                 {
-                    Value = new JsonQueryValueSpec(this, json);
+                    Value = new JsonQueryValueSpec(errors, json);
                     return;
                 }
                 break;
         }
-        Error($"Invalid field spec ({json.ValueKind}).");
+        errors.Add($"Invalid field spec ({json.ValueKind}).");
     }
 }

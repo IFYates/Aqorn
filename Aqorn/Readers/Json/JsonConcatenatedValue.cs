@@ -1,16 +1,15 @@
-﻿using Aqorn.Models;
+﻿using Aqorn.Models.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json;
 
 internal class JsonConcatenatedValue : ConcatenatedValue
 {
-    public JsonConcatenatedValue(IModel field, JsonElement json)
-        : base(field)
+    public JsonConcatenatedValue(IErrorLog errors, string fieldName, JsonElement json)
     {
         if (json.ValueKind != JsonValueKind.Array)
         {
-            Error($"Invalid concatenation type for '{field.Name}'.");
+            errors.Add($"Invalid concatenation type for '{fieldName}'.");
             return;
         }
 
@@ -19,11 +18,11 @@ internal class JsonConcatenatedValue : ConcatenatedValue
         {
             if (element.ValueKind is JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null)
             {
-                values.Add(new JsonFieldValue(this, element));
+                values.Add(new JsonFieldValue(errors, element));
             }
             else
             {
-                Error("Concatenation only supports literal tokens.");
+                errors.Add("Concatenation only supports literal tokens.");
                 return;
             }
         }

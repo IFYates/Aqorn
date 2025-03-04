@@ -1,13 +1,12 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Spec;
+﻿using Aqorn.Models.Spec;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
 internal class JsonFieldSpec : FieldSpec
 {
-    public JsonFieldSpec(IModel parent, string name, JsonElement json)
-        : base(parent, name)
+    public JsonFieldSpec(IErrorLog errors, string name, JsonElement json)
+        : base(name)
     {
         switch (json.ValueKind)
         {
@@ -15,24 +14,25 @@ internal class JsonFieldSpec : FieldSpec
             case JsonValueKind.False:
             case JsonValueKind.Null:
             case JsonValueKind.Number:
-                var fv = new JsonFieldValue(this, json);
+                var fv = new JsonFieldValue(errors, json);
                 Value = fv;
-                ValueType = new FieldTypeSpec(this, fv.Type);
+                ValueType = new FieldTypeSpec(fv.Type);
                 return;
             case JsonValueKind.String:
-                ValueType = new FieldTypeSpec(this, json.GetString()!);
+                ValueType = new JsonFieldTypeSpec(errors, json.GetString()!);
                 return;
             case JsonValueKind.Array:
-                Value = new JsonConcatenatedValue(this, json);
+                var cv = new JsonConcatenatedValue(errors, name, json);
+                Value = cv.Values.Length == 1 ? cv.Values[0] : cv;
                 return;
             case JsonValueKind.Object:
                 if (json.TryGetProperty("?", out _))
                 {
-                    Value = new JsonQueryValueSpec(this, json);
+                    Value = new JsonQueryValueSpec(errors, json);
                     return;
                 }
                 break;
         }
-        Error($"Invalid field spec ({json.ValueKind}).");
+        errors.Add($"Invalid field spec ({json.ValueKind}).");
     }
 }

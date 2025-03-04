@@ -1,12 +1,11 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Data;
+﻿using Aqorn.Models.Data;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
 
 internal class JsonFieldModel : FieldModel
 {
-    public JsonFieldModel(IModel parent, string name, JsonElement json)
+    public JsonFieldModel(IErrorLog errors, TableRowModel parent, string name, JsonElement json)
         : base(parent, name)
     {
         switch (json.ValueKind)
@@ -16,11 +15,11 @@ internal class JsonFieldModel : FieldModel
             case JsonValueKind.Null:
             case JsonValueKind.Number:
             case JsonValueKind.String:
-                var value = new JsonFieldValue(this, json, true);
-                Value = value;
+                Value = new JsonFieldValue(errors, json, true);
                 return;
             case JsonValueKind.Array:
-                Value = new JsonConcatenatedValue(this, json);
+                var cv = new JsonConcatenatedValue(errors, name, json);
+                Value = cv.Values.Length == 1 ? cv.Values[0] : cv;
                 return;
             //case JsonValueKind.Object:
             //    if (json.TryGetProperty("?", out _))
@@ -30,6 +29,6 @@ internal class JsonFieldModel : FieldModel
             //    }
             //    break;
         }
-        Error($"Invalid field definition ({json.ValueKind}).");
+        errors.Add($"Invalid field definition ({json.ValueKind}).");
     }
 }

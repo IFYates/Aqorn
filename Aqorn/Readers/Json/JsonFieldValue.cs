@@ -1,10 +1,10 @@
-﻿using Aqorn.Models;
+﻿using Aqorn.Models.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json;
 
 /// <summary>
-/// Models a value.
+/// Converts a JSON value to a typed value.
 /// "^" Parent field reference
 /// "<" Self field reference
 /// "@" Parameter reference
@@ -12,8 +12,7 @@ namespace Aqorn.Readers.Json;
 /// </summary>
 internal class JsonFieldValue : FieldValue
 {
-    public JsonFieldValue(IModel parent, JsonElement json, bool literal = false)
-        : base(parent)
+    public JsonFieldValue(IErrorLog errors, JsonElement json, bool literal = false)
     {
         switch (json.ValueKind)
         {
@@ -56,7 +55,7 @@ internal class JsonFieldValue : FieldValue
                 break;
 
             default:
-                Error("Invalid value type.");
+                errors.Add("Invalid value type.");
                 break;
         }
     }

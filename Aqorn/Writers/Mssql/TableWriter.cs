@@ -1,6 +1,6 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Data;
+﻿using Aqorn.Models.DbModel;
 using Aqorn.Models.Spec;
+using Aqorn.Models.Values;
 using System.Text;
 
 namespace Aqorn.Writers.Mssql;
@@ -9,47 +9,66 @@ internal class TableWriter
 {
     private const int BATCH = 100; // TODO: option?
 
-    private static string getInsertHead(TableSpec spec, out FieldSpec[] fieldSpecs)
+    private static string getInsertHead(DbColumn[] columns)
     {
+        var table = columns[0].Table;
         var head = new StringBuilder()
-            .AppendFormat("INSERT INTO [{0}].[{1}] (", spec.SchemaName, spec.TableName);
-        fieldSpecs = spec.Fields.Where(f => f.Name[0] != '@').ToArray();
-        foreach (var fieldSpec in fieldSpecs)
+            .Append("INSERT INTO ").Append(tableName(table.SchemaName, table.TableName)).Append('(');
+        foreach (var col in columns)
         {
-            head.AppendFormat("[{0}], ", fieldSpec.Name);
+            head.AppendFormat("[{0}], ", col.Name);
         }
         head.Remove(head.Length - 2, 2)
             .Append(") VALUES");
         return head.ToString();
     }
 
-    public static void GenerateSql(TableModel table, StringBuilder sb)
+    public static void GenerateSql(DbTable table, StringBuilder sb)
     {
-        var head = getInsertHead(table.Spec!, out var fieldSpecs);
+        if (table.IdentityInsert)
+        {
+            sb.Append("SET IDENTITY_INSERT ").Append(table.Name).AppendLine(" ON")
+                .AppendLine("GO");
+        }
+
+        var groups = table.Rows.GroupBy(r => r.ColumnListKey)
+            .ToDictionary(g => g.First().ColumnList, g => g.ToArray());
+        var total = 0;
+        foreach (var group in groups)
+        {
+            writeInsertGroupSql(sb, group.Key, group.Value, ref total);
+        }
+
+        if (table.IdentityInsert)
+        {
+            sb.Append("SET IDENTITY_INSERT ").Append(table.Name).AppendLine(" OFF")
+                .AppendLine("GO");
+        }
+    }
+
+    private static void writeInsertGroupSql(StringBuilder sb, DbColumn[] columns, DbRowData[] rows, ref int total)
+    {
+        var head = getInsertHead(columns);
         var count = 0;
-        foreach (var row in table.Rows)
+        foreach (var row in rows)
         {
             if (count++ % BATCH == 0)
             {
                 if (count > 1)
                 {
                     sb.Remove(sb.Length - 1, 1)
-                        .AppendLine("GO -- " + count);
+                        .AppendLine("GO -- " + (count + total));
                 }
                 sb.AppendLine(head);
             }
 
-            // TODO: group by fields used
             sb.Append("    (");
-            foreach (var fieldSpec in fieldSpecs)
+            foreach (var col in columns)
             {
-                if (row.TryGetField(fieldSpec.Name, out var field))
+                if (row.TryGetField(col.Name, out var field))
                 {
-                    writeFieldSql(sb, field.Value, fieldSpec, row);
-                }
-                else if (fieldSpec.Value != null)
-                {
-                    writeFieldSql(sb, fieldSpec.Value, fieldSpec, row);
+                    writeFieldSql(sb, field.Value!);
+                    sb.Append(", ");
                 }
                 else
                 {
@@ -59,69 +78,53 @@ internal class TableWriter
             sb.Remove(sb.Length - 2, 2)
                 .AppendLine("),");
         }
-
-        sb.AppendLine("GO -- " + count);
+        total += count;
+        sb.Remove(sb.Length - 3, 1)
+            .AppendLine("GO -- " + total);
     }
 
-    private static void writeFieldSql(StringBuilder sb, ValueBase fieldValue, FieldSpec spec, TableRowModel row)
+    private static void writeFieldSql(StringBuilder sb, IValue value)
     {
-        string? value;
-        if (fieldValue is ConcatenatedValue cv)
+        if (value == null)
         {
-            value = string.Join("", cv.Values.Select(v => getFieldValue(v, row)));
-            sb.Append('\'').Append(value.Replace("'", "''")).Append("', ");
+            sb.Append("NULL");
             return;
         }
-        if (fieldValue is FieldValue fv)
+        switch (value)
         {
-            value = getFieldValue(fv, row);
+            case QueryValueSpec qv:
+                sb.Append("(SELECT [").Append(qv.FieldName).Append("] FROM ")
+                    .Append(tableName(qv.SchemaName, qv.TableName));
+                if (qv.Fields.Length > 0)
+                {
+                    sb.Append(" WHERE ");
+                    foreach (var f in qv.Fields)
+                    {
+                        sb.Append('[').Append(f.Name).Append("] = '");
+                        writeFieldSql(sb, f.Value);
+                        sb.Append("' AND ");
+                    }
+                    sb.Remove(sb.Length - 5, 5);
+                }
+                sb.Append(')');
+                return;
         }
-        else
-        {
-            throw new NotImplementedException();
-        }
-
-        // TODO: resolve self/parent earlier
-        switch (spec.ValueType!.Type)
+        switch (value.Type)
         {
             case FieldValue.ValueType.Null:
                 sb.Append("NULL");
                 break;
-            case FieldValue.ValueType.Number:
             case FieldValue.ValueType.Boolean:
+            case FieldValue.ValueType.Number:
+            case FieldValue.ValueType.Sql:
                 sb.Append(value);
                 break;
             default:
-                sb.Append('\'').Append(value.Replace("'", "''")).Append('\'');
+                sb.AppendFormat("'{0}'", value);
                 break;
         }
-        sb.Append(", ");
     }
 
-    private static string getFieldValue(ValueBase value, TableRowModel row)
-    {
-        if (value is ConcatenatedValue cv)
-        {
-            // TODO: drop it by resolving TableRowModel concats earlier
-            return string.Join("", cv.Values.Select(v => getFieldValue(v, row)));
-        }
-        if (value is not FieldValue fv)
-        {
-            throw new NotImplementedException();
-        }
-
-        switch (fv.Type)
-        {
-            case FieldValue.ValueType.Null:
-                return "NULL";
-            case FieldValue.ValueType.Parameter or FieldValue.ValueType.Self:
-                return row.TryGetField(fv.Value, out var selfField) == true
-                    ? getFieldValue(selfField.Value, row) : "NULL";
-            case FieldValue.ValueType.Parent:
-                var parentRow = row.Parent?.Parent as TableRowModel;
-                return parentRow?.TryGetField(fv.Value, out var parField) == true
-                    ? getFieldValue(parField.Value, row) : "NULL";
-        }
-        return fv.Value;
-    }
+    private static string tableName(string? schemaName, string tableName)
+        => (schemaName?.Length > 0 ? $"[{schemaName}]." : "") + $"[{tableName}]";
 }
