@@ -1,21 +1,20 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Spec;
+﻿using Aqorn.Models.Spec;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
 internal class JsonParameterSpec : FieldSpec
 {
-    public JsonParameterSpec(IModel parent, string name, JsonElement json)
-        : base(parent, name)
+    public JsonParameterSpec(IErrorLog errors, string name, JsonElement json)
+        : base(name)
     {
         switch (json.ValueKind)
         {
             case JsonValueKind.String:
-                ValueType = new FieldTypeSpec(this, json.GetString()!);
+                ValueType = new JsonFieldTypeSpec(errors, json.GetString()!);
                 break;
             default:
-                Error($"Invalid parameter spec.");
+                errors.Add("Invalid parameter spec.");
                 break;
         }
     }

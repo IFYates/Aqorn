@@ -1,25 +1,35 @@
-﻿using Aqorn.Models;
-using Aqorn.Models.Spec;
+﻿using Aqorn.Models.Spec;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
 internal class JsonTableSpec : TableSpec
 {
-    public JsonTableSpec(IModel parent, string name, JsonElement json)
-        : base(parent, name)
+    public JsonTableSpec(IErrorLog errors, string name, JsonElement json)
+        : base(name)
     {
         if (json.ValueKind != JsonValueKind.Object)
         {
-            Error($"Table spec must be an object ('{Name}' gave {json.ValueKind}).");
+            errors.Add($"Table spec must be an object ('{Name}' gave {json.ValueKind}).");
             return;
         }
 
-        TableName = Name;
+        // Split schema and table name
         if (json.TryGetProperty("#", out var tableNameProp)
             && tableNameProp.ValueKind == JsonValueKind.String)
         {
-            TableName = tableNameProp.GetString() ?? TableName;
+            name = tableNameProp.GetString() ?? TableName;
+        }
+        var period = name.IndexOf('.');
+        if (period >= 0)
+        {
+            SchemaName = name[..period];
+            TableName = name[(period + 1)..];
+        }
+        else
+        {
+            SchemaName = null;
+            TableName = name;
         }
 
         var fields = new List<FieldSpec>();
@@ -33,32 +43,29 @@ internal class JsonTableSpec : TableSpec
                     break;
                 case ":identity":
                     IdentityInsert = value.ValueKind == JsonValueKind.True
-                        || value.ValueKind == JsonValueKind.Number && value.GetDecimal() != 0
-                        || value.ValueKind == JsonValueKind.String && value.GetString()?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true;
+                        || (value.ValueKind == JsonValueKind.Number && value.GetDecimal() != 0)
+                        || (value.ValueKind == JsonValueKind.String && value.GetString()?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true);
                     break;
                 case ":relations":
-                    Relationships = parseRelationships(fieldItem.Value);
+                    if (fieldItem.Value.ValueKind == JsonValueKind.Object)
+                    {
+                        Relationships = fieldItem.Value.EnumerateObject()
+                            .Select(r => new JsonTableSpec(errors.Step(r.Name), r.Name, r.Value)).ToArray();
+                    }
+                    else
+                    {
+                        errors.Add($"Table relationships spec must be an object (was {json.ValueKind}).");
+                    }
                     break;
+
                 default:
                     FieldSpec field = fieldItem.Name[0] == '@'
-                        ? new JsonParameterSpec(this, fieldItem.Name, fieldItem.Value)
-                        : new JsonFieldSpec(this, fieldItem.Name, fieldItem.Value);
+                        ? new JsonParameterSpec(errors.Step(fieldItem.Name), fieldItem.Name, fieldItem.Value)
+                        : new JsonFieldSpec(errors.Step(fieldItem.Name), fieldItem.Name, fieldItem.Value);
                     fields.Add(field);
                     break;
             }
         }
         Fields = fields.ToArray();
-    }
-
-    private TableSpec[] parseRelationships(JsonElement json)
-    {
-        if (json.ValueKind != JsonValueKind.Object)
-        {
-            Error($"Table relationships spec must be an object ('{Name}' gave {json.ValueKind}).");
-            return [];
-        }
-
-        return json.EnumerateObject()
-            .Select(r => new JsonTableSpec(this, r.Name, r.Value)).ToArray();
     }
 }

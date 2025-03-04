@@ -1,5 +1,4 @@
-﻿using Aqorn.Models.Data;
-using Aqorn.Models.Spec;
+﻿using Aqorn.Models.DbModel;
 using System.Text;
 
 namespace Aqorn.Writers.Mssql;
@@ -9,15 +8,17 @@ namespace Aqorn.Writers.Mssql;
 /// </summary>
 internal class ModelWriter(/* options? */)
 {
-    public string GenerateSql(IDataSchema data, ISchemaSpec spec)
+    public string GenerateSql(DbDataset dataset)
     {
-        ArgumentNullException.ThrowIfNull(data);
-        ArgumentNullException.ThrowIfNull(spec);
+        ArgumentNullException.ThrowIfNull(dataset);
 
         var sb = new StringBuilder();
-        foreach (var table in data.Tables)
+        foreach (var table in dataset.Tables)
         {
-            TableWriter.GenerateSql(table, sb);
+            if (table.Rows.Length > 0)
+            {
+                TableWriter.GenerateSql(table, sb);
+            }
         }
 
         return sb.ToString();

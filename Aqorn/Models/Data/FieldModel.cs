@@ -1,45 +1,26 @@
-﻿using Aqorn.Models.Spec;
+﻿using Aqorn.Models.Values;
 
 namespace Aqorn.Models.Data;
 
-internal class FieldModel(ModelBase parent, string name)
-    : ModelBase(parent, name)
+/// <summary>
+/// A named field with a value.
+/// </summary>
+internal class FieldModel
 {
-    public ValueBase Value { get; protected set; } = null!;
+    public string Name { get; }
+    public TableRowModel Row { get; }
+    public TableModel Table => Row.Table;
 
-    public void Validate(FieldSpec spec)
+    public IValue Value { get; protected set; } = null!;
+
+    public FieldModel(TableRowModel parent, string name)
     {
-        var type = spec.ValueType;
-        if (Value is FieldValue fv && type != null)
-        {
-            var value = fv.Value;
-            if ((string.IsNullOrEmpty(value) || fv.Type == FieldValue.ValueType.Null)
-                && type.Type != FieldValue.ValueType.Null)
-            {
-                Error("Value is required.");
-                return;
-            }
-
-            var valueMatch = type.Type switch
-            {
-                // TODO: FieldValue.ValueType.Binary => null,
-                FieldValue.ValueType.Regex => type.Regex!.IsMatch(value),
-                FieldValue.ValueType.Boolean => bool.TryParse(value, out _),
-                FieldValue.ValueType.Number => decimal.TryParse(value, out _),
-                FieldValue.ValueType.String => !type.Length.HasValue || value.Length <= type.Length.Value,
-                _ => false,
-            };
-            if (!valueMatch)
-            {
-                Error($"Invalid value '{value}' ({type.Type}).");
-            }
-        }
-        else if (Value is ConcatenatedValue && type?.Type is not null and not FieldValue.ValueType.String)
-        {
-            Error($"Concatenated value can not replace {type.Type}.");
-            // TODO: Validate concatenated values
-        }
-
-        // TODO: Self, Parent, Parameter
+        Name = name;
+        Row = parent;
+    }
+    public FieldModel(IValue parent, string name)
+    {
+        Name = name;
+        Row = null!; // TODO
     }
 }

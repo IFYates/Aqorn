@@ -1,6 +1,6 @@
 ﻿namespace Aqorn.Models.Spec;
 
-internal interface ISchemaSpec : ISpecModel, IModelValidator
+internal interface ISchemaSpec
 {
     TableSpec[] Tables { get; }
 }
