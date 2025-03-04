@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.14.35806.103 d17.14
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aqorn", "Aqorn\Aqorn.csproj", "{83D8D2C9-00FD-427C-8FC6-EFAF1AEB6C8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aqorn.Tests", "Aqorn.Tests\Aqorn.Tests.csproj", "{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83D8D2C9-00FD-427C-8FC6-EFAF1AEB6C8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83D8D2C9-00FD-427C-8FC6-EFAF1AEB6C8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83D8D2C9-00FD-427C-8FC6-EFAF1AEB6C8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83D8D2C9-00FD-427C-8FC6-EFAF1AEB6C8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {B763E9A7-1D76-4660-A901-1CDEA9F23771}
+	EndGlobalSection
+EndGlobal
