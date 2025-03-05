@@ -4,16 +4,16 @@
 Generate complex SQL inserts from a human-readable data model.
 
 # Example
-```json
+```jsonc
 // spec.jsonc
 {
-    "dbo.MyTable": {
-        "Id": "!number",
-        "Value": "?string"
+    "dbo.MyTable": { // Table to insert into
+        "Id": "!number", // Required numeric value
+        "Value": "?string" // Optional string value
     }
 }
 ```
-```json
+```jsonc
 // data.jsonc
 {
     "dbo.MyTable": [
