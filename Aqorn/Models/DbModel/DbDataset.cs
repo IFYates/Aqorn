@@ -5,11 +5,11 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Aqorn.Models.DbModel;
 
-internal class DbDataset
+internal sealed class DbDataset
 {
     public DbTable[] Tables { get; }
 
-    public DbDataset(IErrorLog errors, ISchemaSpec specModel)
+    public DbDataset(IErrorLog errors, ISpecSchema specModel)
     {
         Tables = specModel.Tables.Select(t => new DbTable(errors, this, t)).ToArray();
     }

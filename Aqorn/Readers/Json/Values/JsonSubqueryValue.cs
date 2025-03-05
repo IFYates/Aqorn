@@ -1,12 +1,13 @@
 ﻿using Aqorn.Models.Data;
-using Aqorn.Models.Spec;
+using Aqorn.Models.Values;
+using Aqorn.Readers.Json.Data;
 using System.Text.Json;
 
-namespace Aqorn.Readers.Json.Spec;
+namespace Aqorn.Readers.Json.Values;
 
-internal class JsonQueryValueSpec : QueryValueSpec
+internal sealed class JsonSubqueryValue : SubqueryValue
 {
-    public JsonQueryValueSpec(IErrorLog errors, JsonElement json)
+    public JsonSubqueryValue(IErrorLog errors, JsonElement json)
     {
         if (json.ValueKind != JsonValueKind.Object
             || !json.TryGetProperty("?", out var target)
@@ -38,9 +39,9 @@ internal class JsonQueryValueSpec : QueryValueSpec
             TableName = targetStr;
         }
 
-        Fields = json.EnumerateObject()
+        FieldsSpec = json.EnumerateObject()
             .Where(e => e.Name != "?")
-            .Select(e => (FieldModel)new JsonDataField(errors, e.Name, e.Value))
+            .Select(e => (IDataField)new JsonDataField(errors, null!, e.Name, e.Value))
             .ToArray();
     }
 }

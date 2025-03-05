@@ -5,27 +5,29 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Aqorn.Models.DbModel;
 
-internal class DbRowData
+internal sealed class DbDataRow
 {
-    public DbRowData? ParentRow { get; }
+    public DbTable Table { get; }
+    public DbDataRow? ParentRow { get; }
     public DbRowField[] Fields { get; }
 
     public DbColumn[] ColumnList { get; }
     public string ColumnListKey => string.Join(',', ColumnList.Select(c => c.Name));
 
-    public DbRowData(IErrorLog errors, DbTable table, DbRowData? drow, TableRowModel row)
+    public DbDataRow(IErrorLog errors, DbTable table, DbDataRow? drow, IDataRow row)
     {
+        Table = table;
         ParentRow = drow;
 
         // Prepare fields
-        var fields = row.Fields.ToDictionary(f => f.Name);
-        var rows = new List<DbRowField>();
+        var dataFields = row.Fields.ToDictionary(f => f.Name);
+        var rowFields = new List<DbRowField>();
         foreach (var col in table.Columns)
         {
-            if (fields.TryGetValue(col.Name, out var field))
+            if (dataFields.TryGetValue(col.Name, out var field))
             {
-                rows.Add(new DbRowField(this, col, field.Value));
-                fields.Remove(col.Name);
+                rowFields.Add(new DbRowField(this, col, field.Value));
+                dataFields.Remove(col.Name);
             }
             else if (col.IsRequired && col.DefaultValue == null)
             {
@@ -33,17 +35,18 @@ internal class DbRowData
             }
             else
             {
-                rows.Add(new DbRowField(this, col, col.DefaultValue ?? FieldValue.Null));
+                rowFields.Add(new DbRowField(this, col, col.DefaultValue ?? FieldValue.Null));
             }
         }
-        if (fields.Count > 0)
+        if (dataFields.Count > 0)
         {
-            foreach (var field in fields.Values)
+            foreach (var field in dataFields.Values)
             {
                 errors.Step(field.Name).Add("Unable to locate spec for field.");
             }
         }
-        Fields = rows.Where(f => f.IncludeInInsert || f.IsParameter).ToArray();
+
+        Fields = rowFields.Where(f => f.IncludeInInsert || f.IsParameter).ToArray();
         ColumnList = table.Columns.Where(c => Fields.Any(f => f.Column == c && !f.IsParameter)).ToArray();
 
         // Resolve in order
@@ -54,7 +57,7 @@ internal class DbRowData
             count = 0;
             foreach (var field in Fields)
             {
-                if (!field.ResolveValue(errors))
+                if (!field.TryApplyValue(errors.Step(field.Name)))
                 {
                     ++count;
                 }

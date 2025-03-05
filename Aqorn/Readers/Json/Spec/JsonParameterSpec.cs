@@ -1,13 +1,20 @@
 ﻿using Aqorn.Models.Spec;
+using Aqorn.Models.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
-internal class JsonParameterSpec : FieldSpec
+internal sealed class JsonParameterSpec : IColumnSpec
 {
+    public string Name { get; }
+    public IFieldTypeSpec? ValueType { get; }
+    public IValue? DefaultValue { get; }
+
     public JsonParameterSpec(IErrorLog errors, string name, JsonElement json)
-        : base(name)
     {
+        Name = name;
+
+        errors = errors.Step(name);
         switch (json.ValueKind)
         {
             case JsonValueKind.String:

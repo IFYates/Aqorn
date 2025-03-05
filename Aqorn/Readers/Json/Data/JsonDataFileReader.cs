@@ -1,22 +1,22 @@
-﻿using Aqorn.Models.Spec;
+﻿using Aqorn.Models.Data;
 using System.Text.Json;
 
-namespace Aqorn.Readers.Json.Spec;
+namespace Aqorn.Readers.Json.Data;
 
 /// <summary>
-/// Reads a JSON specification file and converts to spec models.
+/// Reads a JSON data file and converts to models.
 /// </summary>
-internal class JsonSpecFile : ISchemaSpec
+internal sealed class JsonDataFileReader : IDataSchema
 {
-    public TableSpec[] Tables { get; }
+    public IDataTable[] Tables { get; }
 
-    public JsonSpecFile(IErrorLog errors, string jsonSpecFile)
+    public JsonDataFileReader(IErrorLog errors, string file)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(jsonSpecFile);
+        ArgumentException.ThrowIfNullOrWhiteSpace(file);
 
         try
         {
-            var json = File.ReadAllText(jsonSpecFile);
+            var json = File.ReadAllText(file);
             var doc = JsonDocument.Parse(json, new JsonDocumentOptions { AllowTrailingCommas = true, CommentHandling = JsonCommentHandling.Skip });
 
             if (doc.RootElement.ValueKind != JsonValueKind.Object)
@@ -27,7 +27,7 @@ internal class JsonSpecFile : ISchemaSpec
             else
             {
                 Tables = doc.RootElement.EnumerateObject()
-                    .Select(t => new JsonTableSpec(errors.Step(t.Name), t.Name, t.Value)).ToArray();
+                    .Select(t => new JsonDataTable(errors.Step(t.Name), t.Name, t.Value)).ToArray();
             }
         }
         catch

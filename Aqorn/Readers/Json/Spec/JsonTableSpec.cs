@@ -3,14 +3,29 @@ using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
-internal class JsonTableSpec : TableSpec
+internal sealed class JsonTableSpec : ITableSpec
 {
-    public JsonTableSpec(IErrorLog errors, string name, JsonElement json)
-        : base(name)
+    public ITableSpec? Parent { get; }
+    public string Name { get; }
+    public string? SchemaName { get; }
+    public string TableName { get; }
+
+    public bool IdentityInsert { get; }
+    public IEnumerable<IColumnSpec> Columns { get; }
+    public ITableSpec[] Relationships { get; }
+
+    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ITableSpec? parent)
     {
+        Parent = parent;
+        Name = name;
+        Relationships = [];
+
+        errors = errors.Step(name);
         if (json.ValueKind != JsonValueKind.Object)
         {
-            errors.Add($"Table spec must be an object ('{Name}' gave {json.ValueKind}).");
+            TableName = Name;
+            Columns = [];
+            errors.Add($"Table spec must be an object ('{name}' gave {json.ValueKind}).");
             return;
         }
 
@@ -18,7 +33,7 @@ internal class JsonTableSpec : TableSpec
         if (json.TryGetProperty("#", out var tableNameProp)
             && tableNameProp.ValueKind == JsonValueKind.String)
         {
-            name = tableNameProp.GetString() ?? TableName;
+            name = tableNameProp.GetString() ?? name;
         }
         var period = name.IndexOf('.');
         if (period >= 0)
@@ -32,7 +47,8 @@ internal class JsonTableSpec : TableSpec
             TableName = name;
         }
 
-        var fields = new List<FieldSpec>();
+        var fields = new List<IColumnSpec>();
+        Columns = fields.AsReadOnly();
         foreach (var fieldItem in json.EnumerateObject())
         {
             var value = fieldItem.Value;
@@ -50,7 +66,7 @@ internal class JsonTableSpec : TableSpec
                     if (fieldItem.Value.ValueKind == JsonValueKind.Object)
                     {
                         Relationships = fieldItem.Value.EnumerateObject()
-                            .Select(r => new JsonTableSpec(errors.Step(r.Name), r.Name, r.Value)).ToArray();
+                            .Select(r => new JsonTableSpec(errors, r.Name, r.Value, this)).ToArray();
                     }
                     else
                     {
@@ -59,13 +75,13 @@ internal class JsonTableSpec : TableSpec
                     break;
 
                 default:
-                    FieldSpec field = fieldItem.Name[0] == '@'
-                        ? new JsonParameterSpec(errors.Step(fieldItem.Name), fieldItem.Name, fieldItem.Value)
-                        : new JsonFieldSpec(errors.Step(fieldItem.Name), fieldItem.Name, fieldItem.Value);
+                    IColumnSpec field = fieldItem.Name[0] == '@'
+                        ? new JsonParameterSpec(errors, fieldItem.Name, fieldItem.Value)
+                        : new JsonColumnSpec(errors, this, fieldItem.Name, fieldItem.Value);
                     fields.Add(field);
                     break;
             }
         }
-        Fields = fields.ToArray();
+        Parent = parent;
     }
 }

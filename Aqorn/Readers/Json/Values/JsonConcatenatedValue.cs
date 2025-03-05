@@ -1,9 +1,10 @@
 ﻿using Aqorn.Models.Values;
+using Aqorn.Readers.Json.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json;
 
-internal class JsonConcatenatedValue : ConcatenatedValue
+internal sealed class JsonConcatenatedValue : ConcatenatedValue
 {
     public JsonConcatenatedValue(IErrorLog errors, string fieldName, JsonElement json)
     {
@@ -18,7 +19,7 @@ internal class JsonConcatenatedValue : ConcatenatedValue
         {
             if (element.ValueKind is JsonValueKind.String or JsonValueKind.Number or JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null)
             {
-                values.Add(new JsonFieldValue(errors, element));
+                values.Add(new JsonFieldValue(element));
             }
             else
             {
