@@ -5,12 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace Aqorn.Models.DbModel;
 
-internal class DbTable
+internal sealed class DbTable
 {
     public DbTable? Parent { get; }
     public DbDataset Dataset { get; }
 
-    public TableSpec Spec { get; }
+    public ITableSpec Spec { get; }
     public string Name => Spec.Name;
     public bool IdentityInsert => Spec.IdentityInsert;
     public string? SchemaName => Spec.SchemaName;
@@ -18,30 +18,30 @@ internal class DbTable
     public DbColumn[] Columns { get; }
     public DbTable[] Relationships { get; }
     
-    private readonly List<DbRowData> _rows = [];
-    public DbRowData[] Rows => _rows.ToArray();
+    private readonly List<DbDataRow> _rows = [];
+    public DbDataRow[] Rows => _rows.ToArray();
 
-    public DbTable(IErrorLog errors, DbTable parent, TableSpec spec)
+    public DbTable(IErrorLog errors, DbTable parent, ITableSpec spec)
         : this(errors, parent.Dataset, spec)
     {
         Parent = parent;
     }
-    public DbTable(IErrorLog errors, DbDataset dataset, TableSpec spec)
+    public DbTable(IErrorLog errors, DbDataset dataset, ITableSpec spec)
     {
         errors = errors.Step(spec.Name);
         Dataset = dataset;
         Spec = spec;
-        Columns = spec.Fields.Select(f => new DbColumn(this, f)).ToArray();
+        Columns = spec.Columns.Select(f => new DbColumn(this, f)).ToArray();
         Relationships = spec.Relationships.Select(r => new DbTable(errors, this, r)).ToArray();
     }
 
-    public void AddData(IErrorLog errors, TableModel table)
+    public void AddData(IErrorLog errors, IDataTable table)
         => addData(errors, table, null);
-    private void addData(IErrorLog errors, TableModel table, DbRowData? parent)
+    private void addData(IErrorLog errors, IDataTable table, DbDataRow? parent)
     {
         foreach (var row in table.Rows)
         {
-            var drow = new DbRowData(errors, this, parent, row);
+            var drow = new DbDataRow(errors, this, parent, row);
             _rows.Add(drow);
 
             foreach (var relData in row.Relationships)

@@ -4,8 +4,13 @@ using System.Text.RegularExpressions;
 
 namespace Aqorn.Readers.Json.Spec;
 
-internal partial class JsonFieldTypeSpec : FieldTypeSpec
+internal sealed partial class JsonFieldTypeSpec : IFieldTypeSpec
 {
+    public bool IsRequired { get; }
+    public FieldValue.ValueType Type { get; }
+    public Regex? Regex { get; }
+    public int? Length { get; }
+
     public JsonFieldTypeSpec(IErrorLog errors, string json)
     {
         if (string.IsNullOrEmpty(json))
@@ -15,7 +20,7 @@ internal partial class JsonFieldTypeSpec : FieldTypeSpec
         }
 
         var match = TypeFormat().Match(json);
-        if (!(json[0] is '!' or '?') || !match.Success)
+        if (!match.Success)
         {
             errors.Add($"Invalid type '{json}'.");
             return;
@@ -32,7 +37,7 @@ internal partial class JsonFieldTypeSpec : FieldTypeSpec
 
         if (type[0] == '/')
         {
-            Type = FieldValue.ValueType.Regex;
+            Type = FieldValue.ValueType.String;
             Regex = new(type[1..^1]);
             return;
         }
@@ -43,9 +48,9 @@ internal partial class JsonFieldTypeSpec : FieldTypeSpec
             "bool" => FieldValue.ValueType.Boolean,
             "number" => FieldValue.ValueType.Number,
             "string" => FieldValue.ValueType.String,
-            _ => FieldValue.ValueType.Null
+            _ => FieldValue.ValueType.Unknown
         };
-        if (Type == FieldValue.ValueType.Null)
+        if (Type == FieldValue.ValueType.Unknown)
         {
             errors.Add($"Invalid type '{type}'.");
         }

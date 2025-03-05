@@ -1,11 +1,10 @@
 ﻿using Aqorn.Models.DbModel;
-using Aqorn.Models.Spec;
 using Aqorn.Models.Values;
 using System.Text;
 
 namespace Aqorn.Writers.Mssql;
 
-internal class TableWriter
+internal sealed class TableWriter(/* options? */)
 {
     private const int BATCH = 100; // TODO: option?
 
@@ -16,23 +15,29 @@ internal class TableWriter
             .Append("INSERT INTO ").Append(tableName(table.SchemaName, table.TableName)).Append('(');
         foreach (var col in columns)
         {
-            head.AppendFormat("[{0}], ", col.Name);
+            head.Append('[').Append(col.Name).Append("], ");
         }
         head.Remove(head.Length - 2, 2)
             .Append(") VALUES");
         return head.ToString();
     }
 
-    public static void GenerateSql(DbTable table, StringBuilder sb)
+    public void GenerateSql(DbTable table, StringBuilder sb)
     {
+        var groups = table.Rows.Where(r => r.ColumnList.Length > 0)
+            .GroupBy(r => r.ColumnListKey)
+            .ToDictionary(g => g.First().ColumnList, g => g.ToArray());
+        if (groups.Count == 0)
+        {
+            return;
+        }
+
         if (table.IdentityInsert)
         {
             sb.Append("SET IDENTITY_INSERT ").Append(table.Name).AppendLine(" ON")
                 .AppendLine("GO");
         }
 
-        var groups = table.Rows.GroupBy(r => r.ColumnListKey)
-            .ToDictionary(g => g.First().ColumnList, g => g.ToArray());
         var total = 0;
         foreach (var group in groups)
         {
@@ -46,7 +51,7 @@ internal class TableWriter
         }
     }
 
-    private static void writeInsertGroupSql(StringBuilder sb, DbColumn[] columns, DbRowData[] rows, ref int total)
+    private static void writeInsertGroupSql(StringBuilder sb, DbColumn[] columns, DbDataRow[] rows, ref int total)
     {
         var head = getInsertHead(columns);
         var count = 0;
@@ -83,31 +88,30 @@ internal class TableWriter
             .AppendLine("GO -- " + total);
     }
 
-    private static void writeFieldSql(StringBuilder sb, IValue value)
+    private static void writeFieldSql(StringBuilder sb, IValue? value)
     {
         if (value == null)
         {
             sb.Append("NULL");
             return;
         }
-        switch (value)
+        if (value is SubqueryValue qv)
         {
-            case QueryValueSpec qv:
-                sb.Append("(SELECT [").Append(qv.FieldName).Append("] FROM ")
-                    .Append(tableName(qv.SchemaName, qv.TableName));
-                if (qv.Fields.Length > 0)
+            sb.Append("(SELECT TOP 1 [").Append(qv.FieldName).Append("] FROM ")
+                .Append(tableName(qv.SchemaName, qv.TableName));
+            if (qv.Fields.Length > 0)
+            {
+                sb.Append(" WHERE ");
+                foreach (var f in qv.Fields)
                 {
-                    sb.Append(" WHERE ");
-                    foreach (var f in qv.Fields)
-                    {
-                        sb.Append('[').Append(f.Name).Append("] = '");
-                        writeFieldSql(sb, f.Value);
-                        sb.Append("' AND ");
-                    }
-                    sb.Remove(sb.Length - 5, 5);
+                    sb.Append('[').Append(f.Name).Append("] = ");
+                    writeFieldSql(sb, f.Value ?? FieldValue.Null);
+                    sb.Append(" AND ");
                 }
-                sb.Append(')');
-                return;
+                sb.Remove(sb.Length - 5, 5);
+            }
+            sb.Append(')');
+            return;
         }
         switch (value.Type)
         {
@@ -120,7 +124,7 @@ internal class TableWriter
                 sb.Append(value);
                 break;
             default:
-                sb.AppendFormat("'{0}'", value);
+                sb.Append('\'').Append(value).Append('\'');
                 break;
         }
     }

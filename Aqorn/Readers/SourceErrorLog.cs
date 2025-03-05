@@ -1,8 +1,11 @@
 ﻿namespace Aqorn.Readers;
 
-internal class SourceErrorLog : IErrorLog
+/// <summary>
+/// Provides a central way to log errors during processing.
+/// </summary>
+internal sealed class SourceErrorLog : IErrorLog
 {
-    private readonly List<(string Path, string Message)> _errors;
+    private readonly IList<(string Path, string Message)> _errors;
     public int ErrorCount => _errors.Count;
     public (string Path, string Message)[] Errors => _errors.ToArray();
 
@@ -13,20 +16,18 @@ internal class SourceErrorLog : IErrorLog
         _errors = [];
         Path = string.Empty;
     }
-    private SourceErrorLog(SourceErrorLog parent, string path)
+    private SourceErrorLog(IList<(string Path, string Message)> errors, string path, string name)
     {
-        _errors = parent._errors;
-        if (path.Contains('.'))
+        _errors = errors;
+        if (name.Contains('.'))
         {
-            path = $"[{path}]";
+            name = $"[{name}]";
         }
-        Path = parent.Path.Length > 0 ? $"{parent.Path}.{path}" : path;
+        Path = path.Length > 0 ? $"{path}.{name}" : name;
     }
 
-    public SourceErrorLog Step(string path) => new(this, path);
-
+    public IErrorLog Step(string name)
+        => new SourceErrorLog(_errors, Path, name);
     public void Add(string message)
-    {
-        _errors.Add((Path, message));
-    }
+        => _errors.Add((Path, message));
 }
