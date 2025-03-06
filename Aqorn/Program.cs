@@ -2,7 +2,7 @@
 using Aqorn.Readers;
 using Aqorn.Readers.Json.Data;
 using Aqorn.Readers.Json.Spec;
-using Aqorn.Writers.Mssql;
+using Aqorn.Mssql.Writers;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Aqorn.Tests")]

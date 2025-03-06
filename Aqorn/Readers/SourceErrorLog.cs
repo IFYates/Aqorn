@@ -1,9 +1,11 @@
-﻿namespace Aqorn.Readers;
+﻿using Aqorn.Models;
+
+namespace Aqorn.Readers;
 
 /// <summary>
 /// Provides a central way to log errors during processing.
 /// </summary>
-internal sealed class SourceErrorLog : IErrorLog
+public sealed class SourceErrorLog : IErrorLog
 {
     private readonly IList<(string Path, string Message)> _errors;
     public int ErrorCount => _errors.Count;

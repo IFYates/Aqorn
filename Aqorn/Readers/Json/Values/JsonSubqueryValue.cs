@@ -1,11 +1,11 @@
-﻿using Aqorn.Models.Data;
+﻿using Aqorn.Models;
 using Aqorn.Models.Values;
 using Aqorn.Readers.Json.Data;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Values;
 
-internal sealed class JsonSubqueryValue : SubqueryValue
+public sealed class JsonSubqueryValue : SubqueryValue
 {
     public JsonSubqueryValue(IErrorLog errors, JsonElement json)
     {

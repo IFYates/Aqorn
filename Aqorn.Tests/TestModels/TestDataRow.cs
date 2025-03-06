@@ -3,7 +3,7 @@ using Aqorn.Models.Spec;
 
 namespace Aqorn.Tests.TestModels;
 
-internal class TestDataRow(IDataTable table, IColumnSpec[] columns, string[] values)
+public class TestDataRow(IDataTable table, IColumnSpec[] columns, string[] values)
     : IDataRow
 {
     public IDataTable Table { get; } = table;

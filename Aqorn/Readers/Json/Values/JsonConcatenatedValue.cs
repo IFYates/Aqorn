@@ -1,10 +1,10 @@
-﻿using Aqorn.Models.Values;
-using Aqorn.Readers.Json.Values;
+﻿using Aqorn.Models;
+using Aqorn.Models.Values;
 using System.Text.Json;
 
-namespace Aqorn.Readers.Json;
+namespace Aqorn.Readers.Json.Values;
 
-internal sealed class JsonConcatenatedValue : ConcatenatedValue
+public sealed class JsonConcatenatedValue : ConcatenatedValue
 {
     public JsonConcatenatedValue(IErrorLog errors, string fieldName, JsonElement json)
     {

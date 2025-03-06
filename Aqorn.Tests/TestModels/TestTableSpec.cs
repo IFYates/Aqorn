@@ -2,14 +2,15 @@
 
 namespace Aqorn.Tests.TestModels;
 
-internal record TestTableSpec(
+public record TestTableSpec(
     string Name,
     string? SchemaName,
     string TableName,
     bool IdentityInsert,
     IEnumerable<IColumnSpec> Columns,
     ITableSpec[] Relationships,
-    ITableSpec? Parent = null
+    ITableSpec? Parent = null,
+    ISpecSchema Schema = null!
 ) : ITableSpec
 {
     public TestTableSpec(string fullTableName, IEnumerable<IColumnSpec> columns)

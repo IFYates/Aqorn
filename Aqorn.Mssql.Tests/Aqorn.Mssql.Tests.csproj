@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>net8.0</TargetFramework>
+		<LangVersion>latest</LangVersion>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestColumnSpec.cs" Link="TestModels\TestColumnSpec.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestDataField.cs" Link="TestModels\TestDataField.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestDataRow.cs" Link="TestModels\TestDataRow.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestDataTable.cs" Link="TestModels\TestDataTable.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestErrorLog.cs" Link="TestModels\TestErrorLog.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestFieldTypeSpec.cs" Link="TestModels\TestFieldTypeSpec.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestTableSpec.cs" Link="TestModels\TestTableSpec.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="coverlet.collector" Version="6.0.2" />
+		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+		<PackageReference Include="MSTest" Version="3.6.4" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<ProjectReference Include="..\Aqorn.Mssql\Aqorn.Mssql.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<Using Include="Microsoft.VisualStudio.TestTools.UnitTesting" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="TestModels\" />
+	</ItemGroup>
+
+</Project>

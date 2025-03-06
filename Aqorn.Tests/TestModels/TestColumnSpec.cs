@@ -3,7 +3,7 @@ using Aqorn.Models.Values;
 
 namespace Aqorn.Tests.TestModels;
 
-internal class TestColumnSpec(string name, FieldValue.ValueType type, bool required = true)
+public class TestColumnSpec(string name, FieldValue.ValueType type, bool required = true)
     : IColumnSpec
 {
     public string Name { get; } = name;

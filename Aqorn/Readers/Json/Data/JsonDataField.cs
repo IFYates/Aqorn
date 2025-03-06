@@ -1,11 +1,12 @@
-﻿using Aqorn.Models.Data;
+﻿using Aqorn.Models;
+using Aqorn.Models.Data;
 using Aqorn.Models.Values;
 using Aqorn.Readers.Json.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
 
-internal sealed class JsonDataField : IDataField
+public sealed class JsonDataField : IDataField
 {
     public string Name { get; }
     public IValue Value { get; }

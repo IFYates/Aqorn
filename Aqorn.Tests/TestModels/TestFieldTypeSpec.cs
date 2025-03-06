@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Aqorn.Tests.TestModels;
 
-internal record TestFieldTypeSpec(
+public record TestFieldTypeSpec(
     FieldValue.ValueType Type,
     bool IsRequired = true,
     Regex? Regex = null,
