@@ -1,4 +1,5 @@
-﻿using Aqorn.Models.Spec;
+﻿using Aqorn.Models;
+using Aqorn.Models.Spec;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
@@ -6,7 +7,7 @@ namespace Aqorn.Readers.Json.Spec;
 /// <summary>
 /// Reads a JSON specification file and converts to spec models.
 /// </summary>
-internal sealed class JsonSpecFileReader : ISpecSchema
+public sealed class JsonSpecFileReader : ISpecSchema
 {
     public IColumnSpec[] Parameters { get; }
     public ITableSpec[] Tables { get; }

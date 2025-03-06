@@ -7,7 +7,6 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<InvariantGlobalization>true</InvariantGlobalization>
-        <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
 		<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>
 	</PropertyGroup>
@@ -21,11 +20,17 @@
         <PackageProjectUrl>https://github.com/IFYates/Aqorn</PackageProjectUrl>
         <RepositoryUrl>https://github.com/IFYates/Aqorn</RepositoryUrl>
         <RepositoryType>GitHub</RepositoryType>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
         <Copyright>(c) IFYates</Copyright>
         <Description>
             Generate complex SQL inserts from a human-readable data model.
         </Description>
         <PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Aqorn.Models\Aqorn.Models.csproj" />
+	  <ProjectReference Include="..\Aqorn.Mssql\Aqorn.Mssql.csproj" />
+	</ItemGroup>
 
 </Project>

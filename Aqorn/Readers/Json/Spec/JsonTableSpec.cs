@@ -1,9 +1,10 @@
-﻿using Aqorn.Models.Spec;
+﻿using Aqorn.Models;
+using Aqorn.Models.Spec;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
-internal sealed class JsonTableSpec : ITableSpec
+public sealed class JsonTableSpec : ITableSpec
 {
     public ITableSpec? Parent { get; }
     public ISpecSchema Schema { get; }

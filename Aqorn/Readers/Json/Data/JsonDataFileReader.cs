@@ -1,4 +1,5 @@
-﻿using Aqorn.Models.Data;
+﻿using Aqorn.Models;
+using Aqorn.Models.Data;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
@@ -6,7 +7,7 @@ namespace Aqorn.Readers.Json.Data;
 /// <summary>
 /// Reads a JSON data file and converts to models.
 /// </summary>
-internal sealed class JsonDataFileReader : IDataSchema
+public sealed class JsonDataFileReader : IDataSchema
 {
     public IDataField[] Parameters { get; }
     public IDataTable[] Tables { get; }

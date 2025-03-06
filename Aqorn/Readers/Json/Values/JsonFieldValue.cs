@@ -10,7 +10,7 @@ namespace Aqorn.Readers.Json.Values;
 /// "@" Parameter reference
 /// "$" Raw SQL
 /// </summary>
-internal sealed class JsonFieldValue : FieldValue
+public sealed class JsonFieldValue : FieldValue
 {
     public JsonFieldValue(JsonElement json)
     {

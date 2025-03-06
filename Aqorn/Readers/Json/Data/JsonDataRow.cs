@@ -1,9 +1,10 @@
-﻿using Aqorn.Models.Data;
+﻿using Aqorn.Models;
+using Aqorn.Models.Data;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
 
-internal sealed class JsonDataRow : IDataRow
+public sealed class JsonDataRow : IDataRow
 {
     public IDataTable Table { get; }
     public IDataField[] Fields { get; }

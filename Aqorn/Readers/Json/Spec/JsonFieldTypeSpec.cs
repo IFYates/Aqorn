@@ -1,10 +1,11 @@
-﻿using Aqorn.Models.Spec;
+﻿using Aqorn.Models;
+using Aqorn.Models.Spec;
 using Aqorn.Models.Values;
 using System.Text.RegularExpressions;
 
 namespace Aqorn.Readers.Json.Spec;
 
-internal sealed partial class JsonFieldTypeSpec : IFieldTypeSpec
+public sealed partial class JsonFieldTypeSpec : IFieldTypeSpec
 {
     public bool IsRequired { get; }
     public FieldValue.ValueType Type { get; }

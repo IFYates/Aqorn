@@ -4,7 +4,7 @@ using Aqorn.Models.Values;
 
 namespace Aqorn.Tests.TestModels;
 
-internal class TestDataField(IColumnSpec column, string value)
+public class TestDataField(IColumnSpec column, string value)
     : IDataField
 {
     public string Name { get; } = column.Name;

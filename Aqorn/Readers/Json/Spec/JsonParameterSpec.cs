@@ -1,10 +1,11 @@
-﻿using Aqorn.Models.Spec;
+﻿using Aqorn.Models;
+using Aqorn.Models.Spec;
 using Aqorn.Models.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
-internal sealed class JsonParameterSpec : IColumnSpec
+public sealed class JsonParameterSpec : IColumnSpec
 {
     public string Name { get; }
     public IFieldTypeSpec? ValueType { get; }

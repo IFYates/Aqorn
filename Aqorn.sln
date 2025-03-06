@@ -11,8 +11,15 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "_Meta", "_Meta", "{02EA681E
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.gitignore = .gitignore
+		ModelFormat.md = ModelFormat.md
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aqorn.Mssql", "Aqorn.Mssql\Aqorn.Mssql.csproj", "{FC23C137-EF7C-4837-9E17-8043A3DA8FC3}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aqorn.Mssql.Tests", "Aqorn.Mssql.Tests\Aqorn.Mssql.Tests.csproj", "{0D910177-2118-A4D5-C883-EB5BD428873C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Aqorn.Models", "Aqorn.Models\Aqorn.Models.csproj", "{B04A9780-0178-8D21-0B0F-2BB7BDB72243}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +35,18 @@ Global
 		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{BE90E919-D2E9-41BD-9A81-0C50C020F0F2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC23C137-EF7C-4837-9E17-8043A3DA8FC3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC23C137-EF7C-4837-9E17-8043A3DA8FC3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC23C137-EF7C-4837-9E17-8043A3DA8FC3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC23C137-EF7C-4837-9E17-8043A3DA8FC3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D910177-2118-A4D5-C883-EB5BD428873C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D910177-2118-A4D5-C883-EB5BD428873C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D910177-2118-A4D5-C883-EB5BD428873C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D910177-2118-A4D5-C883-EB5BD428873C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B04A9780-0178-8D21-0B0F-2BB7BDB72243}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B04A9780-0178-8D21-0B0F-2BB7BDB72243}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B04A9780-0178-8D21-0B0F-2BB7BDB72243}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B04A9780-0178-8D21-0B0F-2BB7BDB72243}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
