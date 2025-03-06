@@ -1,18 +1,24 @@
 ﻿using Aqorn.Models.Data;
-using Aqorn.Models.Spec;
 
 namespace Aqorn.Tests.TestModels;
 
-public class TestDataTable : IDataTable
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+public record TestDataTable : IDataTable
 {
     public IDataSchema Schema { get; }
     public string Name { get; }
-    public IDataRow[] Rows { get; }
+    public List<TestDataRow> Rows { get; } = [];
+    IDataRow[] IDataTable.Rows => Rows.ToArray();
 
-    public TestDataTable(ITableSpec table, params string[][] rowData)
+    public TestDataTable(TestTableSpec table)
     {
         Schema = null!;
         Name = table.Name;
-        Rows = rowData.Select(r => new TestDataRow(this, table.Columns.ToArray(), r)).ToArray();
+    }
+    public TestDataTable(TestTableSpec table, params string[][] rowData)
+    {
+        Schema = null!;
+        Name = table.Name;
+        Rows = rowData.Select(r => new TestDataRow(this, table.Columns.ToArray(), r)).ToList();
     }
 }

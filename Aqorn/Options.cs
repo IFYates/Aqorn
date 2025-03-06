@@ -4,11 +4,13 @@ using System.Text.Json;
 
 namespace Aqorn;
 
-internal class Options
+internal class Options : IOptions
 {
     public string SpecFile { get; } = null!;
     public List<string> DataFiles { get; } = [];
     public Dictionary<string, string> Parameters { get; } = [];
+
+    public int InsertBatchSize { get; } = 100;
 
     public Options(IErrorLog errors, Queue<string> args)
     {

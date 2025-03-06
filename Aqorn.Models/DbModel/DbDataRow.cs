@@ -45,7 +45,7 @@ public sealed class DbDataRow
         {
             foreach (var field in dataFields.Values.Where(f => f.Name[0] != '@'))
             {
-                errors.Step(field.Name).Add("Unable to locate spec for field.");
+                errors.Add($"Unable to locate spec for field ({field.Name}).");
             }
         }
 

@@ -4,9 +4,15 @@ using Aqorn.Models.Values;
 
 namespace Aqorn.Tests.TestModels;
 
-public class TestDataField(IColumnSpec column, string value)
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+public class TestDataField(string name, string value)
     : IDataField
 {
-    public string Name { get; } = column.Name;
-    public IValue Value { get; } = FieldValue.String(value);
+    public string Name { get; } = name;
+    public IValue Value { get; set; } = value != null ? FieldValue.String(value) : FieldValue.Null;
+
+    public TestDataField(IColumnSpec column, string value)
+        : this(column.Name, value)
+    {
+    }
 }

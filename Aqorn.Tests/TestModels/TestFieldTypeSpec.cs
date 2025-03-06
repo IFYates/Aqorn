@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 
 namespace Aqorn.Tests.TestModels;
 
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 public record TestFieldTypeSpec(
     FieldValue.ValueType Type,
     bool IsRequired = true,

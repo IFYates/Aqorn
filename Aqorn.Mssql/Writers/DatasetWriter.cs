@@ -1,4 +1,5 @@
-﻿using Aqorn.Models.DbModel;
+﻿using Aqorn.Models;
+using Aqorn.Models.DbModel;
 using System.Text;
 
 namespace Aqorn.Mssql.Writers;
@@ -6,9 +7,9 @@ namespace Aqorn.Mssql.Writers;
 /// <summary>
 /// Outputs the data model as MSSQL.
 /// </summary>
-public sealed class DatasetWriter(/* options */)
+public sealed class DatasetWriter(IOptions options)
 {
-    private readonly TableWriter _tableWriter = new(/* options */);
+    private readonly TableWriter _tableWriter = new(options);
 
     public string GenerateSql(DbDataset dataset)
     {

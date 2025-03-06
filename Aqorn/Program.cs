@@ -8,14 +8,6 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Aqorn.Tests")]
 
-args = [
-    @"F:\Dev\Aqorn\Examples\ExampleSpec.jsonc",
-    @"F:\Dev\Aqorn\Examples\ExampleData.jsonc",
-    //"-p:Key", "IGNORED",
-    "-p:Title", "Arg Title",
-    //"-p", "F:\\Dev\\Aqorn\\Examples\\ExampleParameterFile.jsonc"
-];
-
 // Arguments
 var errorLog = new SourceErrorLog();
 var options = new Options(errorLog, new(args));
@@ -70,6 +62,6 @@ if (errorLog.ErrorCount > 0)
 }
 
 // Output
-var writer = new DatasetWriter(/* options? */);
+var writer = new DatasetWriter(options);
 var sql = writer.GenerateSql(dataset);
 Console.WriteLine(sql);

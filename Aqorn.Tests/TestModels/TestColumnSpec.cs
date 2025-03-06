@@ -3,6 +3,7 @@ using Aqorn.Models.Values;
 
 namespace Aqorn.Tests.TestModels;
 
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 public class TestColumnSpec(string name, FieldValue.ValueType type, bool required = true)
     : IColumnSpec
 {
