@@ -13,19 +13,26 @@ internal sealed class JsonDataRow : IDataRow
     {
         Table = table;
 
-        var fields = new List<IDataField>();
+        var fields = new Dictionary<string, IDataField>();
+        foreach (var param in table.Schema.Parameters)
+        {
+            fields[param.Name] = param;
+        }
+
         var relations = new List<IDataTable>();
         foreach (var fieldItem in json.EnumerateObject())
         {
             if (fieldItem.Name[0] == ':')
             {
-                relations.Add(new JsonDataTable(errors, fieldItem.Name[1..], fieldItem.Value));
-                continue;
+                relations.Add(new JsonDataTable(errors, fieldItem.Name[1..], fieldItem.Value, table.Schema));
             }
-
-            fields.Add(new JsonDataField(errors, this, fieldItem.Name, fieldItem.Value));
+            else
+            {
+                fields[fieldItem.Name] = new JsonDataField(errors, fieldItem.Name, fieldItem.Value);
+            }
         }
-        Fields = fields.ToArray();
+
+        Fields = fields.Values.ToArray();
         Relationships = relations.ToArray();
     }
 }

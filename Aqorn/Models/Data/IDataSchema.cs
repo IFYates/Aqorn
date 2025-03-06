@@ -5,5 +5,6 @@
 /// </summary>
 internal interface IDataSchema
 {
+    IDataField[] Parameters { get; }
     IDataTable[] Tables { get; }
 }

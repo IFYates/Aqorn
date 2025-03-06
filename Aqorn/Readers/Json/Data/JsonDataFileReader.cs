@@ -8,6 +8,7 @@ namespace Aqorn.Readers.Json.Data;
 /// </summary>
 internal sealed class JsonDataFileReader : IDataSchema
 {
+    public IDataField[] Parameters { get; }
     public IDataTable[] Tables { get; }
 
     public JsonDataFileReader(IErrorLog errors, string file)
@@ -22,17 +23,24 @@ internal sealed class JsonDataFileReader : IDataSchema
             if (doc.RootElement.ValueKind != JsonValueKind.Object)
             {
                 errors.Add("Bad file structure.");
+                Parameters = [];
                 Tables = [];
             }
             else
             {
+                Parameters = doc.RootElement.EnumerateObject()
+                    .Where(t => t.Name[0] == '@')
+                    .Select(t => new JsonDataField(errors, t.Name, t.Value)).ToArray();
+
                 Tables = doc.RootElement.EnumerateObject()
-                    .Select(t => new JsonDataTable(errors.Step(t.Name), t.Name, t.Value)).ToArray();
+                    .Where(t => t.Name[0] != '@')
+                    .Select(t => new JsonDataTable(errors, t.Name, t.Value, this)).ToArray();
             }
         }
         catch
         {
             errors.Add("Invalid JSON file.");
+            Parameters = [];
             Tables = [];
         }
     }

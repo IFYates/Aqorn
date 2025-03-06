@@ -8,6 +8,7 @@ namespace Aqorn.Readers.Json.Spec;
 /// </summary>
 internal sealed class JsonSpecFileReader : ISpecSchema
 {
+    public IColumnSpec[] Parameters { get; }
     public ITableSpec[] Tables { get; }
 
     public JsonSpecFileReader(IErrorLog errors, string jsonSpecFile)
@@ -26,8 +27,13 @@ internal sealed class JsonSpecFileReader : ISpecSchema
             }
             else
             {
+                Parameters = doc.RootElement.EnumerateObject()
+                    .Where(t => t.Name[0] == '@')
+                    .Select(t => new JsonParameterSpec(errors, t.Name, t.Value)).ToArray();
+
                 Tables = doc.RootElement.EnumerateObject()
-                    .Select(t => new JsonTableSpec(errors.Step(t.Name), t.Name, t.Value, null)).ToArray();
+                    .Where(t => t.Name[0] != '@')
+                    .Select(t => new JsonTableSpec(errors, t.Name, t.Value, this)).ToArray();
             }
         }
         catch

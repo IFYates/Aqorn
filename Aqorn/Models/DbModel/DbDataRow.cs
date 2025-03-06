@@ -40,7 +40,7 @@ internal sealed class DbDataRow
         }
         if (dataFields.Count > 0)
         {
-            foreach (var field in dataFields.Values)
+            foreach (var field in dataFields.Values.Where(f => f.Name[0] != '@'))
             {
                 errors.Step(field.Name).Add("Unable to locate spec for field.");
             }
@@ -50,8 +50,8 @@ internal sealed class DbDataRow
         ColumnList = table.Columns.Where(c => Fields.Any(f => f.Column == c && !f.IsParameter)).ToArray();
 
         // Resolve in order
-        int count = 1, lastCount = 0;
-        while (count > 0 && lastCount != count)
+        int count = -1, lastCount = 0;
+        while (count != 0 && lastCount != count)
         {
             lastCount = count;
             count = 0;

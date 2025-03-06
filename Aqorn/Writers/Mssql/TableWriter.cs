@@ -115,10 +115,12 @@ internal sealed class TableWriter(/* options? */)
         }
         switch (value.Type)
         {
+            case FieldValue.ValueType.Boolean:
+                sb.Append(((FieldValue)value).Value == bool.TrueString ? "1" : "0");
+                break;
             case FieldValue.ValueType.Null:
                 sb.Append("NULL");
                 break;
-            case FieldValue.ValueType.Boolean:
             case FieldValue.ValueType.Number:
             case FieldValue.ValueType.Sql:
                 sb.Append(value);

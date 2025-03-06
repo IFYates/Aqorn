@@ -41,7 +41,7 @@ internal sealed class JsonSubqueryValue : SubqueryValue
 
         FieldsSpec = json.EnumerateObject()
             .Where(e => e.Name != "?")
-            .Select(e => (IDataField)new JsonDataField(errors, null!, e.Name, e.Value))
+            .Select(e => new JsonDataField(errors, e.Name, e.Value))
             .ToArray();
     }
 }

@@ -25,7 +25,7 @@ internal sealed class JsonFieldValue : FieldValue
                 break;
             case JsonValueKind.True or JsonValueKind.False:
                 Type = ValueType.Boolean;
-                Value = json.ValueKind == JsonValueKind.True ? "1" : "0";
+                Value = (json.ValueKind == JsonValueKind.True).ToString();
                 break;
             case JsonValueKind.String:
                 Type = ValueType.String;

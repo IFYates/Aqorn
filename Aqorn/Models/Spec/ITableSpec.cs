@@ -6,6 +6,7 @@
 internal interface ITableSpec
 {
     ITableSpec? Parent { get; }
+    ISpecSchema Schema { get; }
     string Name { get; }
     string? SchemaName { get; }
     string TableName { get; }
