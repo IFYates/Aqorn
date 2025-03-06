@@ -5,6 +5,7 @@
 /// </summary>
 internal interface IDataTable
 {
+    IDataSchema Schema { get; }
     string Name { get; }
     IDataRow[] Rows { get; }
 }

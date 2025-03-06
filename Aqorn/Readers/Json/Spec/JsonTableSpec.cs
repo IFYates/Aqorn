@@ -6,6 +6,7 @@ namespace Aqorn.Readers.Json.Spec;
 internal sealed class JsonTableSpec : ITableSpec
 {
     public ITableSpec? Parent { get; }
+    public ISpecSchema Schema { get; }
     public string Name { get; }
     public string? SchemaName { get; }
     public string TableName { get; }
@@ -14,9 +15,14 @@ internal sealed class JsonTableSpec : ITableSpec
     public IEnumerable<IColumnSpec> Columns { get; }
     public ITableSpec[] Relationships { get; }
 
-    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ITableSpec? parent)
+    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ITableSpec parent)
+        : this(errors, name, json, parent.Schema)
     {
         Parent = parent;
+    }
+    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ISpecSchema schema)
+    {
+        Schema = schema;
         Name = name;
         Relationships = [];
 
@@ -82,6 +88,12 @@ internal sealed class JsonTableSpec : ITableSpec
                     break;
             }
         }
-        Parent = parent;
+        foreach (var parameter in schema.Parameters)
+        {
+            if (!fields.Any(f => f.Name == parameter.Name))
+            {
+                fields.Add(parameter);
+            }
+        }
     }
 }

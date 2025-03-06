@@ -26,7 +26,7 @@ internal class FieldValue : IValue
     public string Value { get; protected init; } = null!;
 
     public static FieldValue Null { get; } = new() { Type = ValueType.Null };
-    public static FieldValue Boolean(bool value) => new() { Type = ValueType.Boolean, Value = value ? "1" : "0" };
+    public static FieldValue Boolean(bool value) => new() { Type = ValueType.Boolean, Value = value.ToString() };
     public static FieldValue String(string? literal) => new() { Type = ValueType.String, Value = literal ?? string.Empty };
     public static FieldValue Number(string value) => new() { Type = ValueType.Number, Value = value };
 

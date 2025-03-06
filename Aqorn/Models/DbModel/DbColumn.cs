@@ -26,23 +26,24 @@ internal sealed class DbColumn(DbTable table, IColumnSpec spec)
         switch (Type)
         {
             case FieldValue.ValueType.Boolean:
-                if (str is not "0" and not "1")
+                if (str != bool.TrueString && str != bool.FalseString)
                 {
-                    errors.Add("Value is not a boolean.");
+                    errors.Add("Value is not a boolean: " + str);
                     return FieldValue.Null;
                 }
-                value = FieldValue.Boolean(str == "1");
+                value = FieldValue.Boolean(str == bool.TrueString);
                 break;
             case FieldValue.ValueType.Number:
                 if (!decimal.TryParse(str, out _))
                 {
-                    errors.Add("Value is not a number.");
+                    errors.Add("Value is not a number: " + str);
                     return FieldValue.Null;
                 }
                 value = FieldValue.Number(str);
                 break;
             case FieldValue.ValueType.Sql:
             case FieldValue.ValueType.String:
+            case FieldValue.ValueType.Parent: // TODO: shouldn't reach here
                 break;
             default:
                 errors.Add($"Unexpected value type ({Type}).");
@@ -51,11 +52,11 @@ internal sealed class DbColumn(DbTable table, IColumnSpec spec)
 
         if (ValueType?.Length < str.Length)
         {
-            errors.Add("Value is too long.");
+            errors.Add($"Value is too long ({str.Length} > {ValueType.Length}).");
         }
         else if (ValueType?.Regex?.IsMatch(str) == false)
         {
-            errors.Add("Value does not match pattern.");
+            errors.Add($"Value does not match pattern ({ValueType.Regex}).");
         }
         return value;
     }

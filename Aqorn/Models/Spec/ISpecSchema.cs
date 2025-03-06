@@ -5,5 +5,6 @@
 /// </summary>
 internal interface ISpecSchema
 {
+    IColumnSpec[] Parameters { get; }
     ITableSpec[] Tables { get; }
 }

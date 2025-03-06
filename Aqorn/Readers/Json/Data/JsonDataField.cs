@@ -10,7 +10,7 @@ internal sealed class JsonDataField : IDataField
     public string Name { get; }
     public IValue Value { get; }
 
-    public JsonDataField(IErrorLog errors, IDataRow row, string name, JsonElement json)
+    public JsonDataField(IErrorLog errors, string name, JsonElement json)
     {
         Name = name;
 

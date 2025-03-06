@@ -5,12 +5,14 @@ namespace Aqorn.Readers.Json.Data;
 
 internal sealed class JsonDataTable : IDataTable
 {
+    public IDataSchema Schema { get; }
     public string Name { get; }
     public IDataRow[] Rows { get; }
 
-    public JsonDataTable(IErrorLog errors, string name, JsonElement json)
+    public JsonDataTable(IErrorLog errors, string name, JsonElement json, IDataSchema schema)
     {
         Name = name;
+        Schema = schema;
         Rows = parse(errors.Step(name), json);
     }
 
@@ -23,19 +25,20 @@ internal sealed class JsonDataTable : IDataTable
                 var idx = 0;
                 foreach (var row in json.EnumerateArray())
                 {
+                    var rerrs = errors.Step(idx++.ToString());
                     if (row.ValueKind != JsonValueKind.Object)
                     {
-                        errors.Add($"Table row data must be an object ('{Name}[{idx++}]' gave {row.ValueKind}).");
+                        errors.Add($"Table row data must be an object (was {row.ValueKind}).");
                         continue;
                     }
-                    rows.Add(new JsonDataRow(errors.Step(idx++.ToString()), this, row));
+                    rows.Add(new JsonDataRow(rerrs, this, row));
                 }
                 return rows.ToArray();
             case JsonValueKind.Object:
                 return [new JsonDataRow(errors, this, json)];
 
             default:
-                errors.Add($"Table must be an object ('{Name}' gave {json.ValueKind}).");
+                errors.Add($"Table must be an object (was {json.ValueKind}).");
                 return [];
         }
     }

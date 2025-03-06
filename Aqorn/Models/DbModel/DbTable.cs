@@ -53,8 +53,7 @@ internal sealed class DbTable
                 }
                 else
                 {
-                    errors = errors.Step(relData.Name);
-                    rel.addData(errors, relData, drow);
+                    rel.addData(errors.Step(relData.Name), relData, drow);
                 }
             }
         }
