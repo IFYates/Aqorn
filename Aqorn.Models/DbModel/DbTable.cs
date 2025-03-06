@@ -39,7 +39,7 @@ public sealed class DbTable
 
         var columns = spec.Columns.Select(f => new DbColumn(this, f)).ToArray();
         var parameters = parent?.Parameters.Select(p => new DbColumn(this, p.Spec)).ToArray()
-            ?? dataset.Parameters.Select(p => new DbColumn(this, p)).ToArray();
+            ?? dataset?.Parameters.Select(p => new DbColumn(this, p)).ToArray() ?? [];
         Columns = columns.UnionBy(parameters, a => a.Name).ToArray();
 
         errors = errors.Step(spec.Name);

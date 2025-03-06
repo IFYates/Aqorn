@@ -5,9 +5,9 @@ Generate complex SQL inserts from a human-readable data model.
 
 # Usage
 The command takes 3 input parameters:
-1. [ `-s` / `-spec` ]: (Required) The location of the data model specification file.
-2. [ `-d` / `-data` ]: (Required) One or more data files to parse against the specification.
-3. `-p` / `-param`: Parameter overrides.
+1. [ `-s` / `--spec` ]: (Required) The location of the data model specification file.
+2. [ `-d` / `--data` ]: (Required) One or more data files to parse against the specification.
+3. `-p` / `--param`: Parameter overrides.
    - One or more named parameters in format `-p:name value`.
    - One or more files containing a dictionary of parameter values.
    - One or more dictionaries of parameter values.
@@ -15,16 +15,19 @@ The command takes 3 input parameters:
 Single file parsing:  
 ```sh
 aqorn "spec.jsonc" "data.jsonc"
+aqorn -s "spec.jsonc" -d "data.jsonc"
 ```
 
 Multi-file parsing:  
 ```sh
 aqorn "spec.jsonc" "data1.jsonc" "data2.jsonc" "data3.jsonc"
+aqorn -s "spec.jsonc" -d "data1.jsonc" "data2.jsonc" "data3.jsonc"
 ```
 
 Providing parameters:
 ```sh
 aqorn "spec.jsonc" "data.jsonc" -p:name "Test" -p:state "Active"
+aqorn -s "spec.jsonc" -d "data.jsonc" -p:name "Test" -p:state "Active"
 ```
 
 # Example

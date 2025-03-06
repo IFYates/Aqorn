@@ -22,9 +22,7 @@ public class SubqueryValue : IValue
             SchemaName = SchemaName,
             TableName = TableName,
             FieldName = FieldName,
-            Fields = FieldsSpec.Select(f => new LiteralField(f.Name, f.Value.Resolve(row)!)).ToArray()
+            Fields = FieldsSpec.Select(f => new ConstField(f.Name, f.Value.Resolve(row)!)).ToArray()
         };
     }
-
-    private record LiteralField(string Name, IValue Value) : IDataField;
 }
