@@ -15,6 +15,7 @@ public sealed class DbRowField(DbDataRow row, DbColumn column, IValue source)
 
     public bool TryApplyValue(IErrorLog errors)
     {
+        errors = errors.Step(Name);
         if (!SourceValue.TryResolveValue(errors))
         {
             return false;

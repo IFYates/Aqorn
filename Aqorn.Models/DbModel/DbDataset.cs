@@ -6,10 +6,12 @@ namespace Aqorn.Models.DbModel;
 
 public sealed class DbDataset
 {
+    public IColumnSpec[] Parameters { get; }
     public DbTable[] Tables { get; }
 
     public DbDataset(IErrorLog errors, ISpecSchema specModel)
     {
+        Parameters = specModel.Parameters;
         Tables = specModel.Tables.Select(t => new DbTable(errors, this, t)).ToArray();
     }
 

@@ -14,26 +14,14 @@ public sealed class JsonDataRow : IDataRow
     {
         Table = table;
 
-        var fields = new Dictionary<string, IDataField>();
-        foreach (var param in table.Schema.Parameters)
-        {
-            fields[param.Name] = param;
-        }
+        var properties = json.EnumerateObject().ToArray();
 
-        var relations = new List<IDataTable>();
-        foreach (var fieldItem in json.EnumerateObject())
-        {
-            if (fieldItem.Name[0] == ':')
-            {
-                relations.Add(new JsonDataTable(errors, fieldItem.Name[1..], fieldItem.Value, table.Schema));
-            }
-            else
-            {
-                fields[fieldItem.Name] = new JsonDataField(errors, fieldItem.Name, fieldItem.Value);
-            }
-        }
+        Fields = properties.Where(p => p.Name[0] != ':')
+            .Select(f => new JsonDataField(errors, f.Name, f.Value))
+            .ToArray();
 
-        Fields = fields.Values.ToArray();
-        Relationships = relations.ToArray();
+        Relationships = properties.Where(p => p.Name[0] == ':')
+            .Select(r => new JsonDataTable(errors, r.Name[1..], r.Value, this))
+            .ToArray();
     }
 }

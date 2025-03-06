@@ -1,0 +1,19 @@
+{
+    "@Title": "!string", // Global required parameter
+
+    "ref.Keys": { // Actual table (with schema)
+        "@Key": "!string", // Required parameter
+
+        "Key": [ "@Key" ], // Required field
+        "Description": "?string", // Optional field
+
+        ":relations": {
+            "KeyValues": { // Aliased table model
+                "#": "Values", // Actual table
+                "KeyId": { "?": "ref.Keys.KeyId", "Key": [ "^Key" ] }, // Subquery
+                "Value": "!string",
+                "Comment": [ "@Title", " ", "@Key", " is ", "<Value" ]
+            }
+        }
+    }
+}

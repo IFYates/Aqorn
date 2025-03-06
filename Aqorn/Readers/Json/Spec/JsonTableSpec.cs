@@ -7,23 +7,17 @@ namespace Aqorn.Readers.Json.Spec;
 public sealed class JsonTableSpec : ITableSpec
 {
     public ITableSpec? Parent { get; }
-    public ISpecSchema Schema { get; }
     public string Name { get; }
     public string? SchemaName { get; }
     public string TableName { get; }
 
     public bool IdentityInsert { get; }
-    public IEnumerable<IColumnSpec> Columns { get; }
+    public IColumnSpec[] Columns { get; }
     public ITableSpec[] Relationships { get; }
 
-    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ITableSpec parent)
-        : this(errors, name, json, parent.Schema)
+    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ITableSpec? parent)
     {
         Parent = parent;
-    }
-    public JsonTableSpec(IErrorLog errors, string name, JsonElement json, ISpecSchema schema)
-    {
-        Schema = schema;
         Name = name;
         Relationships = [];
 
@@ -36,8 +30,10 @@ public sealed class JsonTableSpec : ITableSpec
             return;
         }
 
+        var properties = json.EnumerateObject().ToDictionary(p => p.Name, p => p.Value);
+
         // Split schema and table name
-        if (json.TryGetProperty("#", out var tableNameProp)
+        if (properties.Remove("#", out var tableNameProp)
             && tableNameProp.ValueKind == JsonValueKind.String)
         {
             name = tableNameProp.GetString() ?? name;
@@ -54,46 +50,35 @@ public sealed class JsonTableSpec : ITableSpec
             TableName = name;
         }
 
-        var fields = new List<IColumnSpec>();
-        Columns = fields.AsReadOnly();
-        foreach (var fieldItem in json.EnumerateObject())
+        if (properties.Remove(":identity", out var identityProp))
         {
-            var value = fieldItem.Value;
-            switch (fieldItem.Name)
-            {
-                case "#":
-                    // Ignore
-                    break;
-                case ":identity":
-                    IdentityInsert = value.ValueKind == JsonValueKind.True
-                        || (value.ValueKind == JsonValueKind.Number && value.GetDecimal() != 0)
-                        || (value.ValueKind == JsonValueKind.String && value.GetString()?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true);
-                    break;
-                case ":relations":
-                    if (fieldItem.Value.ValueKind == JsonValueKind.Object)
-                    {
-                        Relationships = fieldItem.Value.EnumerateObject()
-                            .Select(r => new JsonTableSpec(errors, r.Name, r.Value, this)).ToArray();
-                    }
-                    else
-                    {
-                        errors.Add($"Table relationships spec must be an object (was {json.ValueKind}).");
-                    }
-                    break;
-
-                default:
-                    IColumnSpec field = fieldItem.Name[0] == '@'
-                        ? new JsonParameterSpec(errors, fieldItem.Name, fieldItem.Value)
-                        : new JsonColumnSpec(errors, this, fieldItem.Name, fieldItem.Value);
-                    fields.Add(field);
-                    break;
-            }
+            IdentityInsert = identityProp.ValueKind == JsonValueKind.True
+                || (identityProp.ValueKind == JsonValueKind.Number && identityProp.GetDecimal() != 0)
+                || (identityProp.ValueKind == JsonValueKind.String && identityProp.GetString()?.Equals("true", StringComparison.InvariantCultureIgnoreCase) == true);
         }
-        foreach (var parameter in schema.Parameters)
+
+        var hasRelations = properties.Remove(":relations", out var relationProp);
+
+        var columns = new Dictionary<string, IColumnSpec>();
+        foreach (var prop in properties.Where(p => p.Key[0] != ':'))
         {
-            if (!fields.Any(f => f.Name == parameter.Name))
+            IColumnSpec column = prop.Key[0] == '@'
+                ? new JsonParameterSpec(errors, prop.Key, prop.Value)
+                : new JsonColumnSpec(errors, prop.Key, prop.Value);
+            columns[column.Name] = column;
+        }
+        Columns = columns.Values.ToArray();
+
+        if (hasRelations)
+        {
+            if (relationProp.ValueKind == JsonValueKind.Object)
             {
-                fields.Add(parameter);
+                Relationships = relationProp.EnumerateObject()
+                    .Select(r => new JsonTableSpec(errors, r.Name, r.Value, this)).ToArray();
+            }
+            else
+            {
+                errors.Add($"Table relationships spec must be an object (was {json.ValueKind}).");
             }
         }
     }

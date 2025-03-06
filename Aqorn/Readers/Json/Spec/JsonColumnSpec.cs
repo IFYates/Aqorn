@@ -12,7 +12,7 @@ public sealed class JsonColumnSpec : IColumnSpec
     public IFieldTypeSpec? ValueType { get; }
     public IValue? DefaultValue { get; }
 
-    public JsonColumnSpec(IErrorLog errors, ITableSpec table, string name, JsonElement json)
+    public JsonColumnSpec(IErrorLog errors, string name, JsonElement json)
     {
         Name = name;
 
@@ -51,20 +51,6 @@ public sealed class JsonColumnSpec : IColumnSpec
                     DefaultValue = new JsonSubqueryValue(errors, json);
                 }
                 break;
-        }
-
-        if (DefaultValue is FieldValue fv)
-        {
-            switch (fv.Type)
-            {
-                case FieldValue.ValueType.Parameter:
-                case FieldValue.ValueType.Self:
-                    ValueType = table.Columns.FirstOrDefault(c => c.Name == fv.Value)?.ValueType;
-                    break;
-                case FieldValue.ValueType.Parent:
-                    ValueType = table.Parent?.Columns.FirstOrDefault(c => c.Name == fv.Value)?.ValueType;
-                    break;
-            }
         }
 
         if ((ValueType?.Type ?? DefaultValue?.Type) is null or FieldValue.ValueType.Unknown)

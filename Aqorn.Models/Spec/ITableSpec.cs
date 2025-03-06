@@ -6,12 +6,11 @@
 public interface ITableSpec
 {
     ITableSpec? Parent { get; }
-    ISpecSchema Schema { get; }
     string Name { get; }
     string? SchemaName { get; }
     string TableName { get; }
 
     bool IdentityInsert { get; }
-    IEnumerable<IColumnSpec> Columns { get; }
+    IColumnSpec[] Columns { get; }
     ITableSpec[] Relationships { get; }
 }

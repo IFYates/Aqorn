@@ -3,7 +3,7 @@ using Aqorn.Models.DbModel;
 
 namespace Aqorn.Models.Values;
 
-public abstract class SubqueryValue : IValue
+public class SubqueryValue : IValue
 {
     public FieldValue.ValueType Type => FieldValue.ValueType.String;
 
@@ -13,10 +13,17 @@ public abstract class SubqueryValue : IValue
     public IDataField[] FieldsSpec { get; protected init; } = [];
     public IDataField[] Fields { get; private set; } = [];
 
+    protected SubqueryValue() { }
+
     public IValue? Resolve(DbDataRow row)
     {
-        Fields = FieldsSpec.Select(f => new LiteralField(f.Name, f.Value.Resolve(row)!)).ToArray();
-        return this;
+        return new SubqueryValue
+        {
+            SchemaName = SchemaName,
+            TableName = TableName,
+            FieldName = FieldName,
+            Fields = FieldsSpec.Select(f => new LiteralField(f.Name, f.Value.Resolve(row)!)).ToArray()
+        };
     }
 
     private record LiteralField(string Name, IValue Value) : IDataField;

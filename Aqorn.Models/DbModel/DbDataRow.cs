@@ -9,24 +9,30 @@ public sealed class DbDataRow
     public DbTable Table { get; }
     public DbDataRow? ParentRow { get; }
     public DbRowField[] Fields { get; }
+    public DbRowField[] Parameters => Fields.Where(f => f.Name[0] == '@').ToArray();
 
     public DbColumn[] ColumnList { get; }
     public string ColumnListKey => string.Join(',', ColumnList.Select(c => c.Name));
 
-    public DbDataRow(IErrorLog errors, DbTable table, DbDataRow? drow, IDataRow row)
+    private record FieldData(string Name, IValue Value) : IDataField;
+
+    public DbDataRow(IErrorLog errors, DbTable table, DbDataRow? parent, IDataRow row)
     {
         Table = table;
-        ParentRow = drow;
+        ParentRow = parent;
+
+        var parameters = ParentRow?.Parameters.Select(p => new FieldData(p.Name, p.Value!)).ToArray()
+            ?? row.Table.Schema.Parameters;
+        var dataFields = row.Fields.UnionBy(parameters, f => f.Name)
+            .ToDictionary(f => f.Name);
 
         // Prepare fields
-        var dataFields = row.Fields.ToDictionary(f => f.Name);
         var rowFields = new List<DbRowField>();
         foreach (var col in table.Columns)
         {
-            if (dataFields.TryGetValue(col.Name, out var field))
+            if (dataFields.Remove(col.Name, out var field))
             {
                 rowFields.Add(new DbRowField(this, col, field.Value));
-                dataFields.Remove(col.Name);
             }
             else if (col.IsRequired && col.DefaultValue == null)
             {
@@ -53,14 +59,7 @@ public sealed class DbDataRow
         while (count != 0 && lastCount != count)
         {
             lastCount = count;
-            count = 0;
-            foreach (var field in Fields)
-            {
-                if (!field.TryApplyValue(errors.Step(field.Name)))
-                {
-                    ++count;
-                }
-            }
+            count = Fields.Count(f => !f.TryApplyValue(errors));
         }
         if (count > 0)
         {
