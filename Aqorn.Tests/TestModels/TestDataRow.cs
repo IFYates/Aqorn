@@ -1,13 +1,17 @@
 ﻿using Aqorn.Models.Data;
-using Aqorn.Models.Spec;
 
 namespace Aqorn.Tests.TestModels;
 
-public class TestDataRow(IDataTable table, IColumnSpec[] columns, string[] values)
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
+public class TestDataRow(TestDataTable table, IEnumerable<TestColumnSpec> columns, params string[] values)
     : IDataRow
 {
-    public IDataTable Table { get; } = table;
-    public IDataField[] Fields { get; }
-        = values.Zip(columns, (v, c) => new TestDataField(c, v)).ToArray();
+    public TestDataTable Table { get; } = table;
+    IDataTable IDataRow.Table => Table;
+
+    public List<TestDataField> Fields { get; }
+        = columns.Select((c, i) => new TestDataField(c, values.Length > i ? values[i] : null!)).ToList();
+    IDataField[] IDataRow.Fields => Fields.ToArray();
+
     public IDataTable[] Relationships { get; } = [];
 }

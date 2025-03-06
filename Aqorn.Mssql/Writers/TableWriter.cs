@@ -1,18 +1,19 @@
-﻿using Aqorn.Models.DbModel;
+﻿using Aqorn.Models;
+using Aqorn.Models.DbModel;
 using Aqorn.Models.Values;
 using System.Text;
 
 namespace Aqorn.Mssql.Writers;
 
-public sealed class TableWriter(/* options? */)
+public sealed class TableWriter(IOptions options)
 {
-    private const int BATCH = 100; // TODO: option?
+    private readonly int _batchSize = options.InsertBatchSize;
 
     private static string getInsertHead(DbColumn[] columns)
     {
         var table = columns[0].Table;
         var head = new StringBuilder()
-            .Append("INSERT INTO ").Append(tableName(table.SchemaName, table.TableName)).Append('(');
+            .Append("INSERT INTO ").Append(tableName(table)).Append('(');
         foreach (var col in columns)
         {
             head.Append('[').Append(col.Name).Append("], ");
@@ -34,7 +35,7 @@ public sealed class TableWriter(/* options? */)
 
         if (table.IdentityInsert)
         {
-            sb.Append("SET IDENTITY_INSERT ").Append(table.Name).AppendLine(" ON")
+            sb.Append("SET IDENTITY_INSERT ").Append(tableName(table)).AppendLine(" ON")
                 .AppendLine("GO");
         }
 
@@ -46,55 +47,41 @@ public sealed class TableWriter(/* options? */)
 
         if (table.IdentityInsert)
         {
-            sb.Append("SET IDENTITY_INSERT ").Append(table.Name).AppendLine(" OFF")
+            sb.Append("SET IDENTITY_INSERT ").Append(tableName(table)).AppendLine(" OFF")
                 .AppendLine("GO");
         }
     }
 
-    private static void writeInsertGroupSql(StringBuilder sb, DbColumn[] columns, DbDataRow[] rows, ref int total)
+    private void writeInsertGroupSql(StringBuilder sb, DbColumn[] columns, DbDataRow[] rows, ref int total)
     {
         var head = getInsertHead(columns);
-        var count = 0;
-        foreach (var row in rows)
+        for (var i = 0; i < rows.Length; ++i)
         {
-            if (count++ % BATCH == 0)
+            if (i % _batchSize == 0)
             {
-                if (count > 1)
+                if (i > 0)
                 {
-                    sb.Remove(sb.Length - 1, 1)
-                        .AppendLine("GO -- " + (count + total));
+                    sb.Remove(sb.Length - 3, 1)
+                        .AppendLine("GO -- " + (i + total));
                 }
                 sb.AppendLine(head);
             }
 
             sb.Append("    (");
-            foreach (var col in columns)
+            foreach (var field in columns.Join(rows[i].Fields, c => c.Name, f => f.Name, (c, f) => f))
             {
-                if (row.TryGetField(col.Name, out var field))
-                {
-                    writeFieldSql(sb, field.Value!);
-                    sb.Append(", ");
-                }
-                else
-                {
-                    sb.Append("NULL, ");
-                }
+                writeFieldSql(sb, field.Value!);
+                sb.Append(", ");
             }
             sb.Remove(sb.Length - 2, 2)
                 .AppendLine("),");
         }
-        total += count;
         sb.Remove(sb.Length - 3, 1)
-            .AppendLine("GO -- " + total);
+            .AppendLine("GO -- " + (total += rows.Length));
     }
 
-    private static void writeFieldSql(StringBuilder sb, IValue? value)
+    private static void writeFieldSql(StringBuilder sb, IValue value)
     {
-        if (value == null)
-        {
-            sb.Append("NULL");
-            return;
-        }
         if (value is SubqueryValue qv)
         {
             sb.Append("(SELECT TOP 1 [").Append(qv.FieldName).Append("] FROM ")
@@ -105,7 +92,7 @@ public sealed class TableWriter(/* options? */)
                 foreach (var f in qv.Fields)
                 {
                     sb.Append('[').Append(f.Name).Append("] = ");
-                    writeFieldSql(sb, f.Value ?? FieldValue.Null);
+                    writeFieldSql(sb, f.Value!);
                     sb.Append(" AND ");
                 }
                 sb.Remove(sb.Length - 5, 5);
@@ -131,6 +118,8 @@ public sealed class TableWriter(/* options? */)
         }
     }
 
+    private static string tableName(DbTable table)
+        => tableName(table.SchemaName, table.TableName);
     private static string tableName(string? schemaName, string tableName)
         => (schemaName?.Length > 0 ? $"[{schemaName}]." : "") + $"[{tableName}]";
 }

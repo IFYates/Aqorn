@@ -2,6 +2,7 @@
 
 namespace Aqorn.Tests.TestModels;
 
+[System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverage]
 internal class TestErrorLog : IErrorLog
 {
     public List<string> Errors { get; } = [];

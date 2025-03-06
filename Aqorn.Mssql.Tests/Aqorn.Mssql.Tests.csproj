@@ -14,6 +14,7 @@
 	  <Compile Include="..\Aqorn.Tests\TestModels\TestDataTable.cs" Link="TestModels\TestDataTable.cs" />
 	  <Compile Include="..\Aqorn.Tests\TestModels\TestErrorLog.cs" Link="TestModels\TestErrorLog.cs" />
 	  <Compile Include="..\Aqorn.Tests\TestModels\TestFieldTypeSpec.cs" Link="TestModels\TestFieldTypeSpec.cs" />
+	  <Compile Include="..\Aqorn.Tests\TestModels\TestSubqueryValue.cs" Link="TestModels\TestSubqueryValue.cs" />
 	  <Compile Include="..\Aqorn.Tests\TestModels\TestTableSpec.cs" Link="TestModels\TestTableSpec.cs" />
 	</ItemGroup>
 

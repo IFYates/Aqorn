@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Aqorn": {
+      "commandName": "Project",
+      "commandLineArgs": "\"F:\\Dev\\Aqorn\\Examples\\ExampleSpec.jsonc\" \"F:\\Dev\\Aqorn\\Examples\\ExampleData.jsonc\" -p:Title \"Arg Title\""
+    }
+  }
+}
