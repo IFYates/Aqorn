@@ -6,9 +6,10 @@ namespace Aqorn.Models.DbModel;
 public sealed class DbColumn(DbTable table, IColumnSpec spec)
 {
     public DbTable Table { get; } = table;
-    public string Name { get; } = spec.Name;
 
-    public IFieldTypeSpec? ValueType { get; } = spec.ValueType;
+    public IColumnSpec Spec { get; } = spec;
+    public string Name { get; } = spec.Name;
+    public IFieldTypeSpec? ValueType { get; private set; } = spec.ValueType;
     public IValue? DefaultValue { get; } = spec.DefaultValue;
     public bool IsRequired { get; } = spec.ValueType?.IsRequired == true && spec.DefaultValue == null;
     public FieldValue.ValueType Type
@@ -21,6 +22,16 @@ public sealed class DbColumn(DbTable table, IColumnSpec spec)
             errors.Add("Invalid value.");
             return FieldValue.Null;
         }
+
+        if (ValueType == null && DefaultValue is FieldValue dfv
+            && dfv.Type is FieldValue.ValueType.Parameter or FieldValue.ValueType.Parent or FieldValue.ValueType.Self)
+        {
+            var source = dfv.Type == FieldValue.ValueType.Parent
+                ? Table.Parent?.Columns
+                : Table.Columns;
+            ValueType = source?.FirstOrDefault(c => c.Name == dfv.Value)?.ValueType;
+        }
+
         var str = fv.Value;
         switch (Type)
         {

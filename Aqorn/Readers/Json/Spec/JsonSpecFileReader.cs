@@ -25,6 +25,7 @@ public sealed class JsonSpecFileReader : ISpecSchema
             {
                 errors.Add("Bad file structure.");
                 Tables = [];
+                Parameters = [];
             }
             else
             {
@@ -34,13 +35,14 @@ public sealed class JsonSpecFileReader : ISpecSchema
 
                 Tables = doc.RootElement.EnumerateObject()
                     .Where(t => t.Name[0] != '@')
-                    .Select(t => new JsonTableSpec(errors, t.Name, t.Value, this)).ToArray();
+                    .Select(t => new JsonTableSpec(errors, t.Name, t.Value, null)).ToArray();
             }
         }
         catch
         {
             errors.Add("Invalid JSON file.");
             Tables = [];
+            Parameters = [];
         }
     }
 }

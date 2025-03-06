@@ -5,7 +5,8 @@
 /// </summary>
 public interface IDataTable
 {
-    IDataSchema Schema { get; }
     string Name { get; }
+    IDataSchema Schema { get; }
+    IDataRow? ParentRow { get; }
     IDataRow[] Rows { get; }
 }

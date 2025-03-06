@@ -7,8 +7,8 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Aqorn.Tests")]
 
-var specfile = @"F:\Neo\NEOne\DevOps\SeedData\Format.jsonc";
-var datafile = @"F:\Neo\NEOne\DevOps\SeedData\Test.jsonc"; // TODO: multiple
+var specfile = @"F:\Dev\Aqorn\Examples\ExampleSpec.jsonc";
+var datafile = @"F:\Dev\Aqorn\Examples\ExampleData.jsonc"; // TODO: multiple
 
 // Parse files
 var errorLog = new SourceErrorLog();

@@ -29,7 +29,7 @@ public sealed class DbValue
                     case FieldValue.ValueType.Self:
                         if (!table.TryGetColumn(fv.Value, out var selfField))
                         {
-                            _depErrors.Add("Could not find self field.");
+                            _depErrors.Add($"Could not find self field ({fv.Value}).");
                             return [];
                         }
                         return [selfField];
@@ -48,7 +48,7 @@ public sealed class DbValue
                     case FieldValue.ValueType.Parameter:
                         if (!table.TryGetColumn(fv.Value, out var parameter))
                         {
-                            _depErrors.Add("Could not find parameter.");
+                            _depErrors.Add($"Could not find parameter ({fv.Value}).");
                             return [];
                         }
                         return [parameter];
@@ -60,7 +60,7 @@ public sealed class DbValue
             case SubqueryValue qv:
                 return qv.Fields.SelectMany(f => findDependencies(f.Value, row)).ToArray();
             default:
-                _depErrors.Add("Invalid field value.");
+                _depErrors.Add($"Invalid field value ({value.Type}).");
                 return [];
         }
     }
@@ -81,9 +81,9 @@ public sealed class DbValue
         {
             foreach (var depend in _dependencies)
             {
-                var drow = depend.Table == _row.ParentRow?.Table
-                    ? _row.ParentRow
-                    : _row;
+                var drow = depend.Table == _row.Table
+                    ? _row
+                    : _row.ParentRow;
                 if (drow?.TryGetField(depend.Name, out var dependField) is null or false)
                 {
                     errors.Add("Unable to resolve reference.");

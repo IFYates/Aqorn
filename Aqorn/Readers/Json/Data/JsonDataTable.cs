@@ -6,14 +6,24 @@ namespace Aqorn.Readers.Json.Data;
 
 public sealed class JsonDataTable : IDataTable
 {
-    public IDataSchema Schema { get; }
     public string Name { get; }
+    public IDataSchema Schema { get; }
+    public IDataRow? ParentRow { get; }
     public IDataRow[] Rows { get; }
 
     public JsonDataTable(IErrorLog errors, string name, JsonElement json, IDataSchema schema)
+        : this(errors, name, json, schema, null)
+    {
+    }
+    public JsonDataTable(IErrorLog errors, string name, JsonElement json, IDataRow parent)
+        : this(errors, name, json, parent.Table.Schema, parent)
+    {
+    }
+    private JsonDataTable(IErrorLog errors, string name, JsonElement json, IDataSchema schema, IDataRow? parent)
     {
         Name = name;
         Schema = schema;
+        ParentRow = parent;
         Rows = parse(errors.Step(name), json);
     }
 

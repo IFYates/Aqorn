@@ -1,6 +1,8 @@
 ﻿using Aqorn.Models.Data;
 using Aqorn.Models.Spec;
+using System.Data;
 using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 
 namespace Aqorn.Models.DbModel;
 
@@ -15,22 +17,32 @@ public sealed class DbTable
     public string? SchemaName => Spec.SchemaName;
     public string TableName => Spec.TableName;
     public DbColumn[] Columns { get; }
+    public DbColumn[] Parameters => Columns.Where(c => c.Name[0] == '@').ToArray();
     public DbTable[] Relationships { get; }
-    
+
     private readonly List<DbDataRow> _rows = [];
     public DbDataRow[] Rows => _rows.ToArray();
 
     public DbTable(IErrorLog errors, DbTable parent, ITableSpec spec)
-        : this(errors, parent.Dataset, spec)
+        : this(errors, parent.Dataset, parent, spec)
     {
-        Parent = parent;
     }
     public DbTable(IErrorLog errors, DbDataset dataset, ITableSpec spec)
+        : this(errors, dataset, null, spec)
     {
-        errors = errors.Step(spec.Name);
+    }
+    private DbTable(IErrorLog errors, DbDataset dataset, DbTable? parent, ITableSpec spec)
+    {
+        Parent = parent;
         Dataset = dataset;
         Spec = spec;
-        Columns = spec.Columns.Select(f => new DbColumn(this, f)).ToArray();
+
+        var columns = spec.Columns.Select(f => new DbColumn(this, f)).ToArray();
+        var parameters = parent?.Parameters.Select(p => new DbColumn(this, p.Spec)).ToArray()
+            ?? dataset.Parameters.Select(p => new DbColumn(this, p)).ToArray();
+        Columns = columns.UnionBy(parameters, a => a.Name).ToArray();
+
+        errors = errors.Step(spec.Name);
         Relationships = spec.Relationships.Select(r => new DbTable(errors, this, r)).ToArray();
     }
 

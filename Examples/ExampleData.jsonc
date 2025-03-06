@@ -1,0 +1,18 @@
+{
+    "@Title": "Data Test",
+
+    "ref.Keys": [
+        {
+            "@Key": "Key 1",
+            ":KeyValues": { "Value": "Value 1" }
+        },
+        {
+            "@Key": "Key 2",
+            "Description": "Description of Key 2",
+            ":KeyValues": { "Value": "Value 2" }
+        },
+        {
+            "@Key": "Key 3"
+        }
+    ]
+}
