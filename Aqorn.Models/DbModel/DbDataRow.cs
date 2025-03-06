@@ -14,15 +14,13 @@ public sealed class DbDataRow
     public DbColumn[] ColumnList { get; }
     public string ColumnListKey => string.Join(',', ColumnList.Select(c => c.Name));
 
-    private record FieldData(string Name, IValue Value) : IDataField;
-
     public DbDataRow(IErrorLog errors, DbTable table, DbDataRow? parent, IDataRow row)
     {
         Table = table;
         ParentRow = parent;
 
-        var parameters = ParentRow?.Parameters.Select(p => new FieldData(p.Name, p.Value!)).ToArray()
-            ?? row.Table.Schema.Parameters;
+        var parameters = ParentRow?.Parameters.Select(p => new ConstField(p.Name, p.Value!)).ToArray()
+            ?? row.Table.Schema?.Parameters ?? [];
         var dataFields = row.Fields.UnionBy(parameters, f => f.Name)
             .ToDictionary(f => f.Name);
 

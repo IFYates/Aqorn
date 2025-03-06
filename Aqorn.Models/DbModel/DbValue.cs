@@ -86,7 +86,7 @@ public sealed class DbValue
                     : _row.ParentRow;
                 if (drow?.TryGetField(depend.Name, out var dependField) is null or false)
                 {
-                    errors.Add("Unable to resolve reference.");
+                    errors.Add($"Unable to resolve reference ({depend.Name}).");
                     return true;
                 }
                 if (dependField.Value == null)

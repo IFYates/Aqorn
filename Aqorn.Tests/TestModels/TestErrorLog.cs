@@ -5,6 +5,7 @@ namespace Aqorn.Tests.TestModels;
 internal class TestErrorLog : IErrorLog
 {
     public List<string> Errors { get; } = [];
+    public int ErrorCount => Errors.Count;
 
     public string Path => string.Empty;
 

@@ -1,5 +1,6 @@
 ﻿using Aqorn.Models;
 using Aqorn.Models.Data;
+using Aqorn.Models.Values;
 using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Data;
@@ -9,7 +10,8 @@ namespace Aqorn.Readers.Json.Data;
 /// </summary>
 public sealed class JsonDataFileReader : IDataSchema
 {
-    public IDataField[] Parameters { get; }
+    private Dictionary<string, IDataField> _parameters = [];
+    public IDataField[] Parameters => _parameters.Values.ToArray();
     public IDataTable[] Tables { get; }
 
     public JsonDataFileReader(IErrorLog errors, string file)
@@ -24,14 +26,14 @@ public sealed class JsonDataFileReader : IDataSchema
             if (doc.RootElement.ValueKind != JsonValueKind.Object)
             {
                 errors.Add("Bad file structure.");
-                Parameters = [];
                 Tables = [];
             }
             else
             {
-                Parameters = doc.RootElement.EnumerateObject()
+                _parameters = doc.RootElement.EnumerateObject()
                     .Where(t => t.Name[0] == '@')
-                    .Select(t => new JsonDataField(errors, t.Name, t.Value)).ToArray();
+                    .Select(t => new JsonDataField(errors, t.Name, t.Value))
+                    .ToDictionary(p => p.Name, p => (IDataField)p);
 
                 Tables = doc.RootElement.EnumerateObject()
                     .Where(t => t.Name[0] != '@')
@@ -41,8 +43,14 @@ public sealed class JsonDataFileReader : IDataSchema
         catch
         {
             errors.Add("Invalid JSON file.");
-            Parameters = [];
             Tables = [];
         }
+    }
+
+    public void SetParameter(string name, string value)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(name);
+        name = name[0] != '@' ? "@" + name : name;
+        _parameters[name] = new ConstField(name, FieldValue.String(value));
     }
 }
