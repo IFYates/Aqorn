@@ -30,6 +30,64 @@ aqorn "spec.jsonc" "data.jsonc" -p:name "Test" -p:state "Active"
 aqorn -s "spec.jsonc" -d "data.jsonc" -p:name "Test" -p:state "Active"
 ```
 
+# Schema
+
+## Primitives
+Possible **type** values are:
+* `bool` / `boolean`
+* `number`
+* `string`
+* `/{regular expression}/`
+
+All must be prefixed with `!` for mandatory or `?` for optional.
+
+A **complex value** is represented as an array, where each component can be a literal or a **reference**:
+* `<{Field}`: Reference to field in same row
+* `^{Field}`: Reference to field in parent row
+* `@{Parameter}`: Reference to parameter at this scope
+* `${SQL}`: Raw SQL statement
+
+This makes string concatenation possible using `[ "string", " ", "string" ]`
+
+A **subquery** is an object containing element `?`, with the following structure:
+```jsonc
+{
+    "?": "[Schema.]Table.Field", // Full path of the field to retrieve
+    "Field": "literal or complex value", // 0 or more fields to match
+}
+```
+
+## Specification file
+```jsonc
+{
+    "@Parameter": "type", // 0 or more global parameters
+    "TableDefinition": { // Target table name or alias
+        "#": "string", // Optional target table name
+        ":identity": "boolean", // Optional boolean for whether this is an identity insert
+        "@Parameter": "type", // 0 or more table parameters
+        "Field": "type, literal, complex value, or subquery", // 1 or more table fields
+        ":relations": { // Optional dictionary of inserts related to each table record
+            // 1 or more TableDefinitions
+        }
+    }
+}
+```
+
+## Data file
+```jsonc
+{
+    "@Parameter": "literal, complex value, or subquery", // Values for global parameters
+    "TableAlias": // Match for TableDefinition item
+    [ // Array of records, or object if only need one
+        {
+            "@Parameter": "literal, complex value, or subquery", // Value for parameter at this scope
+            "Field": "literal, complex value, or subquery", // Value for table field
+            ":{TableAlias}": [] // Provide data for a related record (array or object)
+        }
+    ]
+}
+```
+
 # Example
 ```jsonc
 // spec.jsonc
@@ -76,8 +134,25 @@ flowchart LR
 ```
 
 # Future
+* `":children": [ Table ]` to insert child data (inc `#` for table target)
+* Repeat for parameter set (i.e., provide file containing array of parameter dictionaries and result is full set)
+* Table aliases to be unique across whole spec
+* Relationship can use existing table by alias  
+    `{ TableA: { Relations: { TableB: { overrides } }, TableB: {} }`
+* Maths (+, -, *, /, %, ^)  
+    `[ "=", number, op, number, ... ]`
+* String manipulation (length, substring, upper, lower)
+    `[ "$op", value ] ]` -> `[ [ "sub", "value", 0, [ "=", [ "len", "value" ], "-", 2 ] ]`
+* Binary values `0x...`  
+    inc. concat
+* Date values  
+    inc. adjust, diff
+* Reference multi-depth parent  
+    `"^^Field"`
 * Reference parent insert
     e.g., "^ParentId" for inserted identity
+* Reference other table value  
+    e.g, `{ "@": "TableAlias.Field", "Field1": "Value1", "??": "Fallback" }`
 * Options
     * Output as JSONC valid against spec
     * Use transaction

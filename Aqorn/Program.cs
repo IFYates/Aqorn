@@ -4,9 +4,13 @@ using Aqorn.Mssql.Writers;
 using Aqorn.Readers;
 using Aqorn.Readers.Json.Data;
 using Aqorn.Readers.Json.Spec;
+using System.Reflection;
 using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Aqorn.Tests")]
+
+Console.WriteLine("Aqorn v" + Assembly.GetEntryAssembly()!.GetName().Version + " (c) IFYates 2025");
+Console.WriteLine();
 
 // Arguments
 var errorLog = new SourceErrorLog();
