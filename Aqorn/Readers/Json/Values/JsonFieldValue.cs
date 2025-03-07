@@ -30,7 +30,7 @@ public sealed class JsonFieldValue : FieldValue
             case JsonValueKind.String:
                 Type = ValueType.String;
                 Value = json.GetString() ?? string.Empty;
-                if (Value.Length > 0)
+                if (Value.Length > 1)
                 {
                     switch (Value[0])
                     {

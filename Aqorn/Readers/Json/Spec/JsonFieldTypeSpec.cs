@@ -46,7 +46,7 @@ public sealed partial class JsonFieldTypeSpec : IFieldTypeSpec
         Type = type switch
         {
             // TODO: "binary" => FieldValue.ValueType.Null,
-            "bool" => FieldValue.ValueType.Boolean,
+            "bool" or "boolean" => FieldValue.ValueType.Boolean,
             "number" => FieldValue.ValueType.Number,
             "string" => FieldValue.ValueType.String,
             _ => FieldValue.ValueType.Unknown
