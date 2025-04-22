@@ -22,13 +22,9 @@ public sealed class JsonDataField : IDataField
                 return;
             case JsonValueKind.True:
             case JsonValueKind.False:
-                Value = FieldValue.Boolean(json.ValueKind == JsonValueKind.True);
-                return;
             case JsonValueKind.Number:
-                Value = FieldValue.Number(json.GetRawText());
-                return;
             case JsonValueKind.String:
-                Value = FieldValue.String(json.GetString());
+                Value = new JsonFieldValue(json);
                 return;
 
             case JsonValueKind.Array:

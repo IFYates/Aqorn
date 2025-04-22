@@ -2,7 +2,6 @@
 using Aqorn.Models.Spec;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 
 namespace Aqorn.Models.DbModel;
 
