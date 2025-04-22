@@ -12,11 +12,13 @@ public sealed class SourceErrorLog : IErrorLog
     public (string Path, string Message)[] Errors => _errors.ToArray();
 
     public string Path { get; }
+    public string Current { get; }
 
     public SourceErrorLog()
     {
         _errors = [];
         Path = string.Empty;
+        Current = string.Empty;
     }
     private SourceErrorLog(IList<(string Path, string Message)> errors, string path, string name)
     {
@@ -26,6 +28,7 @@ public sealed class SourceErrorLog : IErrorLog
             name = $"[{name}]";
         }
         Path = path.Length > 0 ? $"{path}.{name}" : name;
+        Current = name;
     }
 
     public IErrorLog Step(string name)

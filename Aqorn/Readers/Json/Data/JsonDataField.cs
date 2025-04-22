@@ -15,6 +15,7 @@ public sealed class JsonDataField : IDataField
     {
         Name = name;
 
+        errors = errors.Step(name);
         switch (json.ValueKind)
         {
             case JsonValueKind.Null:
@@ -28,7 +29,7 @@ public sealed class JsonDataField : IDataField
                 return;
 
             case JsonValueKind.Array:
-                var cv = new JsonConcatenatedValue(errors, name, json);
+                var cv = new JsonConcatenatedValue(errors, json);
                 Value = cv.Values.Length == 1 ? cv.Values[0] : cv;
                 return;
             case JsonValueKind.Object:
