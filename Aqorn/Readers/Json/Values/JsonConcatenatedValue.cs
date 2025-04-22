@@ -6,11 +6,11 @@ namespace Aqorn.Readers.Json.Values;
 
 public sealed class JsonConcatenatedValue : ConcatenatedValue
 {
-    public JsonConcatenatedValue(IErrorLog errors, string fieldName, JsonElement json)
+    public JsonConcatenatedValue(IErrorLog errors, JsonElement json)
     {
         if (json.ValueKind != JsonValueKind.Array)
         {
-            errors.Add($"Invalid concatenation type for '{fieldName}'.");
+            errors.Add($"Invalid concatenation type for '{errors.Current}'.");
             return;
         }
 

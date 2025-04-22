@@ -6,7 +6,7 @@ using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
-public sealed class JsonColumnSpec : IColumnSpec
+public class JsonColumnSpec : IColumnSpec
 {
     public string Name { get; }
     public IFieldTypeSpec? ValueType { get; }
@@ -42,7 +42,7 @@ public sealed class JsonColumnSpec : IColumnSpec
                 }
                 break;
             case JsonValueKind.Array:
-                var cv = new JsonConcatenatedValue(errors, name, json);
+                var cv = new JsonConcatenatedValue(errors, json);
                 DefaultValue = cv.Values.Length == 1 ? cv.Values[0] : cv;
                 break;
             case JsonValueKind.Object:

@@ -3,6 +3,7 @@
 public interface IErrorLog
 {
     string Path { get; }
+    string Current { get; }
     int ErrorCount { get; }
 
     void Add(string message);
