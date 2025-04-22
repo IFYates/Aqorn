@@ -22,7 +22,8 @@ public class SubqueryValue : IValue
             SchemaName = SchemaName,
             TableName = TableName,
             FieldName = FieldName,
-            Fields = FieldsSpec.Select(f => new ConstField(f.Name, f.Value.Resolve(row)!)).ToArray()
+            Fields = FieldsSpec.Select(f => new ConstField(f.Name, f.Value.Resolve(row)!)).ToArray(),
+            FieldsSpec = FieldsSpec
         };
     }
 }

@@ -9,7 +9,7 @@ using System.Runtime.CompilerServices;
 
 [assembly: InternalsVisibleTo("Aqorn.Tests")]
 
-Console.WriteLine("Aqorn v" + Assembly.GetEntryAssembly()!.GetName().Version + " (c) IFYates 2025");
+Console.WriteLine("-- Aqorn v" + Assembly.GetEntryAssembly()!.GetName().Version + " (c) IFYates 2025");
 Console.WriteLine();
 
 // Arguments

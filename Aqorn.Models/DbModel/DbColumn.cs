@@ -32,8 +32,13 @@ public sealed class DbColumn(DbTable table, IColumnSpec spec)
             ValueType = source?.FirstOrDefault(c => c.Name == dfv.Value)?.ValueType;
         }
 
+        // Use resolved value type
+        var type = Type is FieldValue.ValueType.Parameter or FieldValue.ValueType.Parent or FieldValue.ValueType.Self
+            ? fv.Type
+            : Type;
+
         var str = fv.Value;
-        switch (Type)
+        switch (type)
         {
             case FieldValue.ValueType.Boolean:
                 if (str != bool.TrueString && str != bool.FalseString)
@@ -51,8 +56,6 @@ public sealed class DbColumn(DbTable table, IColumnSpec spec)
                 }
                 value = FieldValue.Number(str);
                 break;
-            case FieldValue.ValueType.Parent: // Accept resolved value
-            case FieldValue.ValueType.Self: // Accept resolved value
             case FieldValue.ValueType.Sql:
             case FieldValue.ValueType.String:
                 break;

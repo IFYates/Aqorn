@@ -5,25 +5,7 @@ using System.Text.Json;
 
 namespace Aqorn.Readers.Json.Spec;
 
-public sealed class JsonParameterSpec : IColumnSpec
+public sealed class JsonParameterSpec(IErrorLog errors, string name, JsonElement json)
+    : JsonColumnSpec(errors, name, json)
 {
-    public string Name { get; }
-    public IFieldTypeSpec? ValueType { get; }
-    public IValue? DefaultValue { get; }
-
-    public JsonParameterSpec(IErrorLog errors, string name, JsonElement json)
-    {
-        Name = name;
-
-        errors = errors.Step(name);
-        switch (json.ValueKind)
-        {
-            case JsonValueKind.String:
-                ValueType = new JsonFieldTypeSpec(errors, json.GetString()!);
-                break;
-            default:
-                errors.Add("Invalid parameter spec.");
-                break;
-        }
-    }
 }
