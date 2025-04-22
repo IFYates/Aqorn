@@ -57,7 +57,9 @@ public sealed class DbDataRow
         while (count != 0 && lastCount != count)
         {
             lastCount = count;
-            count = Fields.Count(f => !f.TryApplyValue(errors));
+            count = Fields
+                .OrderBy(f => f.Name[0] == '@' ? 0 : 1) // Parameters first
+                .Count(f => !f.TryApplyValue(errors));
         }
         if (count > 0)
         {
